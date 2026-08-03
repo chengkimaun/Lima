@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Literature Matrix | Organize Your Research</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2563eb', // A professional blue
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-sans antialiased text-gray-900 bg-white">
+
+    <!-- Navigation -->
+    <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+        <div class="text-xl font-bold text-primary">LitMatrix</div>
+        <div class="hidden md:flex space-x-6">
+            <a href="#features" class="hover:text-primary transition">Features</a>
+            <a href="#how-it-works" class="hover:text-primary transition">How it Works</a>
+        </div>
+        <a href="#signup" class="bg-primary text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition">Get Started</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="container mx-auto px-6 py-20 text-center md:py-32">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">
+            Stop losing track of <span class="text-primary">your research</span>
+        </h1>
+        <p class="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+            A systematic tool for researchers and students to organize sources, extract key findings, and identify gaps across papers.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="#signup" class="bg-primary text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition shadow-lg">Try it Free</a>
+            <a href="#demo" class="bg-white border-2 border-gray-200 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:border-gray-300 transition">View Example</a>
+        </div>
+        
+        <!-- Placeholder for App Screenshot -->
+        <div class="mt-16 relative mx-auto max-w-5xl">
+            <div class="bg-gray-100 rounded-xl shadow-2xl border border-gray-200 h-64 md:h-96 flex items-center justify-center overflow-hidden">
+                <p class="text-gray-400 font-medium">Replace this with a screenshot of your app</p>
+                <!-- <img src="your-app-screenshot.png" alt="App interface" class="object-cover w-full h-full"> -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section id="features" class="bg-gray-50 py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center mb-16">Everything you need to write better literature reviews</h2>
+            
+            <div class="grid md:grid-cols-3 gap-12">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-blue-100 text-primary rounded-lg flex items-center justify-center mb-6 text-2xl">📝</div>
+                    <h3 class="text-xl font-bold mb-3">Structured Extraction</h3>
+                    <p class="text-gray-600">Extract methodology, findings, and limitations systematically so you never have to re-read a paper.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-blue-100 text-primary rounded-lg flex items-center justify-center mb-6 text-2xl">🔍</div>
+                    <h3 class="text-xl font-bold mb-3">Identify Gaps</h3>
+                    <p class="text-gray-600">Spot contradictions and gaps across multiple papers easily with our comparison views.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                    <div class="w-12 h-12 bg-blue-100 text-primary rounded-lg flex items-center justify-center mb-6 text-2xl">⚡</div>
+                    <h3 class="text-xl font-bold mb-3">Export Anywhere</h3>
+                    <p class="text-gray-600">Export your synthesis directly to CSV, Excel, or JSON when you're ready to start writing.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / CTA -->
+    <footer class="bg-gray-900 text-white py-12 text-center">
+        <div class="container mx-auto px-6">
+            <h2 class="text-2xl font-bold mb-6">Ready to organize your literature?</h2>
+            <a href="#signup" class="inline-block bg-primary text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-600 transition">Start Your First Matrix</a>
+            <p class="mt-12 text-gray-400 text-sm">© 2026 Literature Matrix. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
