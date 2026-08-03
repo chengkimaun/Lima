@@ -57,6 +57,7 @@
                 <p class="text-gray-600">A powerful central database and built-in browser engine to collect, filter, and export research papers effortlessly.</p>
             </div>
 
+            <!-- Feature 1: Imports -->
             <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
                 <div class="space-y-6">
                     <div class="bg-blue-50 border-l-4 border-primary p-6 rounded-r-xl">
@@ -74,6 +75,7 @@
                 </div>
             </div>
 
+            <!-- Feature 2: Filters & Export -->
             <div class="grid lg:grid-cols-2 gap-12 items-center mb-16 lg:flex-row-reverse">
                 <div class="bg-slate-100 rounded-xl border border-gray-200 h-64 flex items-center justify-center p-4 lg:order-1">
                     <p class="text-gray-400 font-medium text-center">[ Image Placeholder: Filtering & Exporting Options ]</p>
@@ -91,7 +93,8 @@
                 </div>
             </div>
 
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <!-- Feature 3: Internal Browser -->
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
                 <div class="space-y-6">
                     <div class="bg-blue-50 border-l-4 border-primary p-6 rounded-r-xl">
                         <h3 class="text-2xl font-bold text-slate-900 mb-2">3. Internal Research Browser</h3>
@@ -102,11 +105,59 @@
                     <p class="text-gray-400 font-medium text-center">[ Image Placeholder: Internal Browser Interface ]</p>
                 </div>
             </div>
+
+            <!-- NEW: Feature 4: UI Themes -->
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16 lg:flex-row-reverse">
+                 <div class="grid grid-cols-2 gap-4 lg:order-1">
+                    <div class="bg-slate-100 rounded-xl border border-gray-200 h-64 flex items-center justify-center p-4 shadow-sm">
+                        <p class="text-gray-400 font-medium text-center text-sm">[ Image: Light Theme ]</p>
+                    </div>
+                    <div class="bg-slate-800 rounded-xl border border-slate-700 h-64 flex items-center justify-center p-4 shadow-sm">
+                        <p class="text-slate-500 font-medium text-center text-sm">[ Image: Dark Theme ]</p>
+                    </div>
+                </div>
+                <div class="space-y-6 lg:order-2">
+                    <div class="bg-blue-50 border-l-4 border-primary p-6 rounded-r-xl">
+                        <h3 class="text-2xl font-bold text-slate-900 mb-2">4. App Appearance & Themes</h3>
+                        <p class="text-gray-600">Work comfortably in any lighting condition. Choose between a crisp <strong>Light mode</strong>, a sleek <strong>Dark mode</strong> to reduce eye strain during late-night research sessions, or set it to match your <strong>System</strong> default automatically.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW: Feature 5: AI Prompt Generator -->
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <div class="bg-blue-50 border-l-4 border-primary p-6 rounded-r-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl">🤖</div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-2">5. AI Prompt Generator</h3>
+                        <p class="text-gray-600 mb-4">Bridge the gap between your library and AI assistants. Automatically generate highly optimized instructions for LLMs based on single or batch papers in your database.</p>
+                        <ul class="text-sm text-gray-700 space-y-2 mb-4">
+                            <li>• Request formatted <strong>RIS</strong> or <strong>BibTeX</strong> data.</li>
+                            <li>• Generate instructions for deep <strong>Paper Summarization</strong>.</li>
+                            <li>• Process <strong>Single Papers</strong> or <strong>Batch Extracts</strong>.</li>
+                        </ul>
+                        <p class="text-xs text-slate-500 font-medium">Just copy the generated prompt to your clipboard and paste it directly into tools like <span class="text-primary">Google NotebookLM</span>, <span class="text-primary">Jenni AI</span>, or <span class="text-primary">Claude</span> alongside your uploaded PDFs.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-100 rounded-xl border border-gray-200 h-64 flex flex-col items-center justify-center p-6 text-center">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 w-full mb-4">
+                        <p class="text-left text-xs font-mono text-gray-500 mb-2">System Prompt Preview...</p>
+                        <div class="h-2 bg-gray-200 rounded w-full mb-2"></div>
+                        <div class="h-2 bg-gray-200 rounded w-5/6 mb-2"></div>
+                        <div class="h-2 bg-gray-200 rounded w-4/6"></div>
+                    </div>
+                    <button class="bg-gray-800 text-white text-sm px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-700 transition">
+                        <span>📋</span> Copy AI Prompt to Clipboard
+                    </button>
+                </div>
+            </div>
+
         </div>
     </section>
 
     <!-- WORD'S ADD-IN SECTION -->
     <section id="word-addin" class="py-20 bg-slate-900 text-white">
+        <!-- ... (This section remains exactly the same as the previous response) ... -->
         <div class="container mx-auto px-6">
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-900 text-blue-300 uppercase tracking-wider">Seamless Integration</span>
@@ -114,19 +165,15 @@
                 <p class="text-slate-400">Everything you need to write, cite, and format directly within Microsoft Word.</p>
             </div>
 
-            <!-- Features Grid for Word Add-In -->
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                <!-- 1. Getting Started -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">1</div>
                     <h3 class="text-xl font-bold mb-3">Getting Started</h3>
                     <ul class="text-slate-300 text-sm space-y-2">
                         <li><strong class="text-white">Open Literature Matrix:</strong> Launches main application to manage master database.</li>
-                        <li><strong class="text-white">Help:</strong> Opens this user guide & documentation.</li>
+                        <li><strong class="text-white">Help:</strong> Opens this user guide.</li>
                     </ul>
                 </div>
-
-                <!-- 2. Library Setting Group -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">2</div>
                     <h3 class="text-xl font-bold mb-3">Library Setting Group</h3>
@@ -136,8 +183,6 @@
                         <li><strong class="text-white">Refresh Citation & Bibliography:</strong> Immediate sync + Auto Refresh toggle.</li>
                     </ul>
                 </div>
-
-                <!-- 3. Appearance -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">3</div>
                     <h3 class="text-xl font-bold mb-3">Appearance</h3>
@@ -149,8 +194,6 @@
                         <li><strong class="text-white">Search Options:</strong> Author+Year+Title, All Columns, Custom Match Highlight Colors.</li>
                     </ul>
                 </div>
-
-                <!-- 4. Space & Indent -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">4</div>
                     <h3 class="text-xl font-bold mb-3">Space & Indent</h3>
@@ -160,8 +203,6 @@
                         <li><strong class="text-white">By Measurement:</strong> Custom inches (e.g., 0.25" to 1.5").</li>
                     </ul>
                 </div>
-
-                <!-- 5. Font & Style -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">5</div>
                     <h3 class="text-xl font-bold mb-3">Font & Style</h3>
@@ -171,8 +212,6 @@
                         <li><strong class="text-white">List Style:</strong> Bullets, Numeric (1), [1], (1), or custom list formatting.</li>
                     </ul>
                 </div>
-
-                <!-- 6. Citation & Hyperlink -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">6</div>
                     <h3 class="text-xl font-bold mb-3">Citation & Hyperlink</h3>
@@ -185,9 +224,7 @@
                 </div>
             </div>
 
-            <!-- PDF & Context Menu Row -->
             <div class="grid md:grid-cols-2 gap-8 mb-16">
-                <!-- PDF Export -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
                         <span class="text-red-400 text-2xl">📄</span> 7. Save As PDF
@@ -196,8 +233,6 @@
                         Instantly cleans up Word field shading and exports your document layout cleanly to PDF while preserving bookmarks and active hyperlinked citations.
                     </p>
                 </div>
-
-                <!-- Right-Click Context Menu -->
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
                     <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
                         <span class="text-blue-400 text-2xl">🖱️</span> 8. Right-Click Context Menu
@@ -211,7 +246,6 @@
                 </div>
             </div>
 
-            <!-- Keyboard Shortcuts Table -->
             <div id="how-to" class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700">
                 <h3 class="text-2xl font-bold mb-6 text-center">9. Word Add-in Shortcuts at a Glance</h3>
                 <div class="overflow-x-auto">
@@ -225,7 +259,7 @@
                         <tbody class="divide-y divide-slate-700">
                             <tr>
                                 <td class="px-6 py-4 font-mono text-blue-400 font-bold">Alt + A</td>
-                                <td class="px-6 py-4">Switch between Literature Matrix app and Word (Maximizes Word on switch), auto-selecting current library.</td>
+                                <td class="px-6 py-4">Switch between Literature Matrix app and Word, auto-selecting current library.</td>
                             </tr>
                             <tr>
                                 <td class="px-6 py-4 font-mono text-blue-400 font-bold">Alt + C</td>
@@ -250,23 +284,72 @@
         </div>
     </section>
 
-    <!-- DOWNLOAD & UPDATE SECTION -->
-    <section id="download" class="py-20 bg-white">
-        <div class="container mx-auto px-6 text-center max-w-3xl">
-            <h2 class="text-3xl font-extrabold text-slate-900 mb-4">Download & Updates</h2>
-            <p class="text-gray-600 mb-8">Get the latest standalone Literature Matrix desktop client and Word Ribbon Add-in bundle.</p>
+    <!-- NEW: DOWNLOAD & UPDATE SECTION -->
+    <section id="download" class="py-20 bg-slate-50">
+        <div class="container mx-auto px-6 max-w-4xl">
             
-            <div class="bg-slate-50 border border-gray-200 p-8 rounded-2xl shadow-sm text-left mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-lg font-bold text-slate-900">Literature Matrix Bundle</span>
-                    <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full">v4.0.0.2 Latest</span>
-                </div>
-                <p class="text-gray-600 text-sm mb-6">Includes Desktop Application + Microsoft Word Ribbon Add-in + Sample Library Database.</p>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <a href="#" class="bg-primary text-white text-center px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">Download Installer (.exe)</a>
-                    <a href="#" class="bg-white border border-gray-300 text-center px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition">View Version Changelog</a>
+            <!-- Download Top Area -->
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-extrabold text-slate-900 mb-4">Download & Updates</h2>
+                <p class="text-gray-600 mb-8">Get the latest standalone Literature Matrix desktop client and Word Ribbon Add-in bundle. Start organizing your research today.</p>
+                
+                <div class="bg-white border border-blue-200 p-8 rounded-2xl shadow-lg shadow-blue-500/10">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-100 pb-6">
+                        <div class="text-left">
+                            <h3 class="text-2xl font-bold text-slate-900">Literature Matrix Bundle</h3>
+                            <p class="text-gray-500 text-sm mt-1">Includes Desktop App + Word Add-in + Sample Database</p>
+                        </div>
+                        <span class="bg-green-100 text-green-800 text-sm font-bold px-4 py-1.5 rounded-full">v4.0.0.2 Latest</span>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <a href="#" class="bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                            <span>⬇️</span> Download Installer (.exe)
+                        </a>
+                        <a href="#" class="bg-white border-2 border-gray-200 text-slate-700 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 hover:bg-gray-50 transition shadow-sm flex items-center justify-center gap-2">
+                            <span>📦</span> Download Portable (.zip)
+                        </a>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4 text-center">Compatible with Windows 10 & 11. Requires Microsoft Word 2016 or newer.</p>
                 </div>
             </div>
+
+            <!-- Changelog Bottom Area -->
+            <div class="mt-16">
+                <h3 class="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <span>📝</span> Release History & Changelog
+                </h3>
+                
+                <div class="space-y-6">
+                    <!-- Version 4.0.0.2 -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-bold text-primary">Version 4.0.0.2</h4>
+                            <span class="text-sm text-gray-500 font-medium">Latest Release</span>
+                        </div>
+                        <ul class="list-disc list-inside text-gray-600 text-sm space-y-2">
+                            <li>Added AI Prompt Generator for single and batch papers (RIS/Bib/Summaries).</li>
+                            <li>Introduced robust Theme engine (Light, Dark, System modes).</li>
+                            <li>Optimized large document handling for Word documents with 550,000+ characters (50+ pages).</li>
+                            <li>Improved font rendering and UI layout alignments.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Previous Version Outline -->
+                    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm opacity-80">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-lg font-bold text-slate-700">Version 3.x Updates</h4>
+                            <span class="text-sm text-gray-500 font-medium">Previous Branch</span>
+                        </div>
+                        <ul class="list-disc list-inside text-gray-600 text-sm space-y-2">
+                            <li>Introduced Internal Browser for rapid metadata extraction.</li>
+                            <li>Added multi-format export capabilities (DOCX, RIS, BibTeX).</li>
+                            <li>Enhanced citation hyperlink engine and back-referencing.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </section>
 
