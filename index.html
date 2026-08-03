@@ -21,8 +21,9 @@
             }
         }
     </script>
-    <!-- Theme Toggle Script -->
+    <!-- Theme & Routing Script -->
     <script>
+        // Theme Logic
         function initTheme() {
             if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
                 document.documentElement.classList.add('dark');
@@ -38,709 +39,761 @@
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
         }
+        
+        // Mobile Menu Logic
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Virtual Page Routing Logic (Single Page Application)
+        function switchPage(pageId, scrollToId = null) {
+            // Hide all virtual pages
+            document.querySelectorAll('.page-view').forEach(page => {
+                page.classList.add('hidden');
+                page.classList.remove('block');
+            });
+            
+            // Show the requested virtual page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.remove('hidden');
+                targetPage.classList.add('block');
+            }
+
+            // Scroll to specific section within the page, or top of the page
+            if (scrollToId) {
+                setTimeout(() => {
+                    const el = document.getElementById(scrollToId);
+                    if (el) {
+                        const y = el.getBoundingClientRect().top + window.scrollY - 80; // Offset for sticky header
+                        window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                }, 50);
+            } else {
+                window.scrollTo({top: 0, behavior: 'auto'}); // Instant snap to top for new pages
+            }
+
+            // Close mobile menu if it was open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                toggleMobileMenu();
+            }
+        }
+
         window.addEventListener('DOMContentLoaded', initTheme);
     </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body class="font-sans antialiased text-gray-900 bg-slate-50 dark:bg-darkbg dark:text-gray-100 transition-colors duration-300">
+<body class="font-sans antialiased text-gray-900 bg-slate-50 dark:bg-darkbg dark:text-gray-100 transition-colors duration-300 flex flex-col min-h-screen">
 
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-white/90 dark:bg-darkbg/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-colors duration-300">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="#" class="flex items-center gap-2 text-2xl font-extrabold text-primary tracking-tight">
+        <div class="container mx-auto px-6 py-4 flex flex-wrap justify-between items-center relative">
+            <a href="#" onclick="switchPage('page-home')" class="flex items-center gap-2 text-2xl font-extrabold text-primary tracking-tight shrink-0">
                 <img src="library.ico" alt="Logo" class="w-8 h-8" onerror="this.style.display='none'">
                 Literature Matrix
             </a>
             
-            <div class="hidden lg:flex items-center space-x-6 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base">
-                <a href="#features" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">App Feature</a>
-                <a href="#app-shortcuts" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">App Shortcut</a>
-                <a href="#word-addin" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</a>
-                <a href="#addin-shortcuts" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Add-In Shortcut</a>
-                <a href="#pricing" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</a>
-                <a href="#how-to" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">How-to</a>
-                <a href="#download" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Download & Update</a>
-                
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition" aria-label="Toggle Dark Mode">
-                    <span id="theme-icon" class="text-xl">🌙</span>
+            <!-- Mobile Controls -->
+            <div class="flex items-center gap-4 lg:hidden">
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none" aria-label="Toggle Dark Mode">
+                    <span id="theme-icon-mobile" class="text-xl">🌙</span>
+                </button>
+                <button onclick="toggleMobileMenu()" class="p-2 text-gray-600 dark:text-gray-300 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
                 </button>
             </div>
 
-            <div class="flex items-center gap-4 lg:hidden">
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition">
-                    <span id="theme-icon-mobile" class="text-xl">🌙</span>
+            <!-- Desktop Menu (Simplified & Uncrowded) -->
+            <div class="hidden lg:flex items-center space-x-8 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base">
+                <button onclick="switchPage('page-home')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Home</button>
+                <button onclick="switchPage('page-home', 'word-addin')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</button>
+                <button onclick="switchPage('page-pricing')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</button>
+                <button onclick="switchPage('page-tutorials')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Tutorials</button>
+                <button onclick="switchPage('page-download')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Download</button>
+                
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition shrink-0" aria-label="Toggle Dark Mode">
+                    <span id="theme-icon" class="text-xl">🌙</span>
                 </button>
-                <a href="#download" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm">Get App</a>
+                <button onclick="switchPage('page-download')" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm shrink-0">Get App</button>
+            </div>
+            
+            <!-- Mobile Menu Dropdown -->
+            <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-white dark:bg-darkbg border-b border-gray-200 dark:border-slate-800 shadow-lg lg:hidden flex flex-col p-4 space-y-4 font-medium text-gray-700 dark:text-gray-300">
+                <button onclick="switchPage('page-home')" class="text-left hover:text-primary dark:hover:text-blue-400">Home</button>
+                <button onclick="switchPage('page-home', 'word-addin')" class="text-left hover:text-primary dark:hover:text-blue-400">Word Add-In</button>
+                <button onclick="switchPage('page-pricing')" class="text-left hover:text-primary dark:hover:text-blue-400">Pricing</button>
+                <button onclick="switchPage('page-tutorials')" class="text-left hover:text-primary dark:hover:text-blue-400">Tutorials</button>
+                <button onclick="switchPage('page-download')" class="text-left hover:text-primary dark:hover:text-blue-400">Download & Update</button>
+                <div class="pt-2 border-t border-gray-100 dark:border-slate-800">
+                    <button onclick="switchPage('page-download')" class="w-full text-center bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm">Get App</button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="container mx-auto px-6 pt-16 pb-20 text-center">
-        <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">All-in-One Literature & Citation Tool</span>
-        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-6 mb-6 text-slate-900 dark:text-white">
-            Master Your References with <span class="text-primary dark:text-blue-400">Literature Matrix</span>
-        </h1>
-        <p class="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl mx-auto leading-relaxed">
-            Organize over 40+ reference types, manage master database libraries, and seamlessly insert formatted citations into Microsoft Word with active hyperlinking and custom quick-search controls.
-        </p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#download" class="bg-primary text-white px-8 py-3.5 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-500/20">Download Literature Matrix</a>
-            <a href="#word-addin" class="bg-white dark:bg-darkcard border border-gray-300 dark:border-slate-700 text-slate-700 dark:text-gray-200 px-8 py-3.5 rounded-xl text-lg font-semibold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Explore Word Add-in</a>
-        </div>
-    </header>
+    <!-- MAIN CONTENT WRAPPER -->
+    <main class="flex-grow">
 
-    <!-- MAIN APP OVERVIEW -->
-    <section id="features" class="py-16 bg-white dark:bg-darkbg border-t border-gray-100 dark:border-slate-800 transition-colors duration-300">
-        <div class="container mx-auto px-6">
-            <div class="text-center max-w-2xl mx-auto mb-16">
-                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Section I — Main App Overview</h2>
-                <p class="text-gray-600 dark:text-gray-400">A powerful central database and built-in browser engine to collect, analyze, and visualize research papers effortlessly.</p>
-            </div>
-
-            <!-- Feature 1: Imports & Reference Types -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
-                <div class="space-y-6">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">1. 40+ Reference Types & Master Imports</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Support for over 40 distinct publication types. Import existing references via RIS, BibTeX (.bib), or EndNote (.enw).</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
-                            <strong>Advanced Options:</strong> Users can add custom fields and toggle advanced tracking (Methodology, Findings, Gaps, Contributions) even for non-research types like Books or Book Chapters.
-                        </p>
-                    </div>
-                </div>
-                <!-- CSS Visual: Scrolling Tag Cloud -->
-                <div class="bg-slate-50 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col p-4 shadow-inner overflow-hidden relative">
-                    <div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-50 dark:from-darkcard to-transparent z-10 pointer-events-none"></div>
-                    <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Supported Types</h4>
-                    <div class="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-8">
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Journal Article</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book Section</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Conference Paper</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Web Page</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Report</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Thesis</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Generic</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Artwork</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Audio Recording</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Bill</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Blog Post</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Case</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Computer Program</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dataset</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dictionary Entry</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Document</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">E-mail</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Encyclopedia</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Film/Broadcast</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Forum Post</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Gov. Document</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Grant</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Hearing</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Interview</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Legal Rule</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Letter</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Magazine</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Manuscript</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Map</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Patent</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Podcast</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Preprint</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Presentation</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Social Media</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Standard</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Statute</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">TV Episode</span>
-                        <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Video</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 2: Filters & Export -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16 lg:flex-row-reverse">
-                <!-- CSS Visual: Filter UI Mockup matching the App -->
-                <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col p-4 shadow-sm lg:order-1 relative overflow-hidden">
-                    <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center">
-                        <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900">
-                            <span class="text-gray-400 text-xs mr-2">🔍</span>
-                            <span class="text-xs text-gray-500 font-medium font-mono">Ctrl+F Search...</span>
-                        </div>
-                        <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900">All Themes ▾</div>
-                        <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900">All Types ▾</div>
-                    </div>
-                    <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-sm overflow-hidden flex flex-col">
-                        <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700">
-                            <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700">AUTHOR</div>
-                            <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700">YEAR</div>
-                            <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2]">TITLE</div>
-                        </div>
-                        <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20">
-                            <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700">Smith, J.</div>
-                            <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700">2024</div>
-                            <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2]"><span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Literature</span> Review on AI</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-6 lg:order-2">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">2. Advanced Filtering & Multi-Format Export</h3>
-                        <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
-                            <li>• <strong>Filter by:</strong> Custom Theme, Type of Reference, or use the global searching box.</li>
-                            <li>• <strong>Visual Searching:</strong> Toggle Keyword Highlight matching in search results.</li>
-                            <li>• <strong>Customize View:</strong> Selectively show or hide specific matrix columns.</li>
-                        </ul>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Export references seamlessly to DOCX, RIS, BibTeX, or ENW formats.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 3: Mindmap Visualization -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
-                <div class="space-y-6">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">3. Interactive Mindmap</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Visualize literature connections instantly with 5 dynamic chart layouts: Hierarchical map, Tree (horizontal/vertical), Spider Web, and SunBurst.</p>
-                        <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
-                            <li>• <strong>Sort Nodes by:</strong> Theme, Author, Year, or Methodology.</li>
-                            <li>• <strong>Fully Customizable:</strong> Adjust font sizes, box styles, and connector lines to create publication-ready diagrams.</li>
-                        </ul>
-                    </div>
-                </div>
-                <!-- CSS Visual: Mindmap Mockup mimicking ECharts -->
-                <div class="bg-[#f8fafc] dark:bg-[#0f172a] rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col overflow-hidden relative shadow-sm">
-                    <!-- Fake ECharts Control Bar -->
-                    <div class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-slate-700 h-10 px-3 flex items-center gap-3 z-10 shadow-sm">
-                        <div class="flex items-center gap-1"><span class="text-[10px] font-bold text-slate-500">Type:</span><div class="h-4 w-20 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded"></div></div>
-                        <div class="flex items-center gap-1"><span class="text-[10px] font-bold text-slate-500">Group By:</span><div class="h-4 w-16 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded"></div></div>
-                    </div>
-                    <!-- Node Map -->
-                    <div class="flex-1 relative" style="background-image: radial-gradient(var(--tw-colors-slate-300) 1px, transparent 0); background-size: 20px 20px;">
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="relative w-full max-w-xs h-full flex items-center justify-center">
-                                <!-- Connectors -->
-                                <div class="absolute w-20 h-0.5 bg-[#5470c6] transform rotate-[35deg] translate-x-14 -translate-y-8 origin-left"></div>
-                                <div class="absolute w-20 h-0.5 bg-[#91cc75] transform -rotate-[35deg] translate-x-14 translate-y-8 origin-left"></div>
-                                <div class="absolute w-20 h-0.5 bg-[#fac858] transform rotate-[145deg] -translate-x-14 -translate-y-8 origin-right"></div>
-                                <!-- Nodes -->
-                                <div class="z-10 bg-[#1e293b] dark:bg-white text-white dark:text-[#1e293b] px-3 py-1.5 rounded shadow-md text-xs font-bold border-2 border-[#1e293b] dark:border-white">Literature Matrix</div>
-                                <div class="absolute top-10 right-6 bg-white dark:bg-[#1e293b] px-2 py-1 rounded shadow border-2 border-[#5470c6] text-[10px] font-bold text-slate-700 dark:text-gray-200">AI Methodology</div>
-                                <div class="absolute bottom-10 right-6 bg-white dark:bg-[#1e293b] px-2 py-1 rounded shadow border-2 border-[#91cc75] text-[10px] font-bold text-slate-700 dark:text-gray-200">Clinical Data</div>
-                                <div class="absolute top-10 left-6 bg-white dark:bg-[#1e293b] px-2 py-1 rounded shadow border-2 border-[#fac858] text-[10px] font-bold text-slate-700 dark:text-gray-200">Smith (2024)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 4: Analytics -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16 lg:flex-row-reverse">
-                <!-- CSS Visual: Analytics 2x2 Dashboard Mockup -->
-                <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col p-2 shadow-sm lg:order-1">
-                    <div class="bg-white dark:bg-slate-800 h-8 rounded mb-2 border border-gray-200 dark:border-slate-600 flex items-center px-2 gap-2">
-                        <span class="text-[10px] font-bold text-slate-500">View Mode:</span>
-                        <div class="h-4 w-24 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded"></div>
-                    </div>
-                    <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-2">
-                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5">
-                            <div class="text-[8px] font-bold text-slate-700 dark:text-slate-300 mb-1">Publication Trends</div>
-                            <div class="flex-1 flex items-end gap-1 px-2">
-                                <div class="w-full bg-[#5470c6] rounded-t h-[40%]"></div><div class="w-full bg-[#5470c6] rounded-t h-[70%]"></div><div class="w-full bg-[#5470c6] rounded-t h-[50%]"></div>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5 items-center justify-center relative">
-                             <div class="absolute top-1.5 left-1.5 text-[8px] font-bold text-slate-700 dark:text-slate-300">Journal Impact</div>
-                             <div class="w-12 h-12 rounded-full border-4 border-[#91cc75] border-t-[#fac858] border-r-[#ee6666]"></div>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5">
-                            <div class="text-[8px] font-bold text-slate-700 dark:text-slate-300 mb-1">Methodology</div>
-                            <div class="flex-1 relative">
-                                <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none"><path d="M0,20 Q10,10 20,20 T40,15 T60,25" fill="none" stroke="#fac858" stroke-width="2"/></svg>
-                            </div>
-                        </div>
-                        <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5">
-                             <div class="text-[8px] font-bold text-slate-700 dark:text-slate-300 mb-1">Top Authors</div>
-                             <div class="flex-1 flex flex-col gap-1 justify-center">
-                                 <div class="h-1.5 bg-[#73c0de] rounded w-full"></div>
-                                 <div class="h-1.5 bg-[#73c0de] rounded w-[80%]"></div>
-                                 <div class="h-1.5 bg-[#73c0de] rounded w-[60%]"></div>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-6 lg:order-2">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">4. Data Analytics</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Uncover patterns in your literature database with distinct analytical views:</p>
-                        <ul class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
-                            <li>📊 Publication Trends</li>
-                            <li>📊 Methodological Distribution</li>
-                            <li>📊 Journal Impact (Q-Rank)</li>
-                            <li>📊 Top Authors</li>
-                        </ul>
-                        <p class="text-xs text-slate-500 font-medium">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 5: Main App Shortcuts -->
-            <div id="app-shortcuts" class="mb-16 scroll-mt-24">
-                <div class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto">
-                    <h3 class="text-2xl font-bold mb-2 text-center text-white">5. Main Application Shortcuts</h3>
-                    <p class="text-slate-400 text-center text-sm mb-6">Work faster with these global hotkeys in the Literature Matrix UI.</p>
-                    <div class="grid sm:grid-cols-2 gap-4">
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                            <span class="text-sm text-slate-300">Add Literature</span>
-                            <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + L</code>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                            <span class="text-sm text-slate-300">Edit Literature</span>
-                            <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + E</code>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                            <span class="text-sm text-slate-300">Copy Citation <span class="text-[10px] text-slate-500">(multi-select)</span></span>
-                            <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + C</code>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                            <span class="text-sm text-slate-300">Export Literature <span class="text-[10px] text-slate-500">(multi-select)</span></span>
-                            <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + S</code>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                            <span class="text-sm text-slate-300">Export Entire Matrix to Excel</span>
-                            <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + X</code>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                            <span class="text-sm text-slate-300">Delete Row <span class="text-[10px] text-slate-500">(multi-select)</span></span>
-                            <code class="font-mono text-red-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Del</code>
-                        </div>
-                        <div class="flex justify-between items-center border-b border-slate-700 pb-2 sm:col-span-2">
-                            <span class="text-sm text-slate-300">Open Visualizers</span>
-                            <div class="flex gap-2">
-                                <code class="font-mono text-emerald-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + M (Mindmap)</code>
-                                <code class="font-mono text-purple-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + T (Analytics)</code>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 6: Internal Browser (Swapped Layout: Text Left, Visual Right) -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
-                <div class="space-y-6">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">6. Internal Research Browser</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-3">Browse online literature directly inside Literature Matrix without leaving the environment. Allows rapid metadata extraction straight into your database.</p>
-                        <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
-                            <li>• <strong>Live Q-Rank:</strong> Instantly overlay journal impact rankings (Q1-Q4) directly onto Google Scholar search results.</li>
-                            <li>• <strong>Sci-Hub Integration:</strong> Built-in support for resolving DOIs on any website and Google Scholar.</li>
-                            <li>• Flexibly toggle these overlay features ON or OFF globally.</li>
-                        </ul>
-                    </div>
-                </div>
-                <!-- CSS Mockup: Browser Window -->
-                <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col overflow-hidden shadow-sm">
-                    <!-- Browser Header -->
-                    <div class="bg-gray-200 dark:bg-slate-800 h-10 w-full flex items-center px-3 gap-3 border-b border-gray-300 dark:border-slate-600">
-                        <div class="flex gap-1.5"><div class="w-3 h-3 rounded-full bg-red-400"></div><div class="w-3 h-3 rounded-full bg-yellow-400"></div><div class="w-3 h-3 rounded-full bg-green-400"></div></div>
-                        <div class="bg-white dark:bg-slate-700 h-6 flex-1 rounded text-[10px] text-gray-500 flex items-center px-2 font-mono">scholar.google.com</div>
-                        <!-- Toggles -->
-                        <div class="flex gap-2">
-                            <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">Q-RANK</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
-                            <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">SCI-HUB</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
-                        </div>
-                    </div>
-                    <!-- Browser Body -->
-                    <div class="flex-1 p-5 bg-white dark:bg-slate-900 flex flex-col gap-3 relative">
-                        <div class="flex items-center gap-2">
-                            <div class="h-5 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-                            <span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Q1</span>
-                        </div>
-                        <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
-                        <div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded"></div>
-                        <div class="absolute bottom-4 left-4 bg-orange-100 text-orange-800 border border-orange-200 text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1"><span>🔓</span> Open via Sci-Hub</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 7: Themes (Kept Layout: Visual Left, Text Right) -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16 lg:flex-row-reverse">
-                 <div class="space-y-6 lg:order-2">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">7. App Appearance & Themes</h3>
-                        <p class="text-gray-600 dark:text-gray-400">Work comfortably in any lighting condition. Choose between a crisp <strong>Light mode</strong>, a sleek <strong>Dark mode</strong> to reduce eye strain during late-night research sessions, or set it to match your <strong>System</strong> default automatically.</p>
-                    </div>
-                </div>
-                 <div class="grid grid-cols-2 gap-4 lg:order-1">
-                    <div class="bg-slate-100 rounded-xl border border-gray-200 h-48 flex flex-col items-center justify-center p-4 shadow-sm">
-                        <span class="text-4xl mb-2 drop-shadow-md">☀️</span>
-                        <p class="text-slate-700 font-bold text-sm">Light Theme</p>
-                    </div>
-                    <div class="bg-[#1e293b] rounded-xl border border-slate-700 h-48 flex flex-col items-center justify-center p-4 shadow-sm">
-                        <span class="text-4xl mb-2 drop-shadow-md">🌙</span>
-                        <p class="text-slate-200 font-bold text-sm">Dark Theme</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Feature 8: AI Prompts (Swapped Layout: Text Left, Visual Right) -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <div class="space-y-6">
-                    <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 text-6xl">🤖</div>
-                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">8. AI Prompt Generator</h3>
-                        <p class="text-gray-600 dark:text-gray-400 mb-4">Bridge the gap between your library and AI assistants. Automatically generate highly optimized instructions for LLMs based on single or batch papers in your database.</p>
-                        <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
-                            <li>• Request formatted <strong>RIS</strong> or <strong>BibTeX</strong> data extraction.</li>
-                            <li>• Generate instructions for deep <strong>Paper Summarization</strong>.</li>
-                            <li>• Process <strong>Single Papers</strong> or massive <strong>Batch Extracts</strong>.</li>
-                        </ul>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Just copy the generated prompt to your clipboard and paste it directly into tools like <span class="text-primary dark:text-blue-400">Google NotebookLM</span>, <span class="text-primary dark:text-blue-400">Jenni AI</span>, or <span class="text-primary dark:text-blue-400">Claude</span> alongside your uploaded PDFs.</p>
-                    </div>
-                </div>
-                <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col items-center justify-center p-6 text-center shadow-sm">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 w-full mb-4 relative">
-                        <p class="text-left text-[10px] font-mono text-gray-500 dark:text-gray-400 mb-2">"Summarize the following papers focusing on methodology and gaps..."</p>
-                        <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-full mb-1.5"></div>
-                        <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-5/6 mb-1.5"></div>
-                        <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-4/6"></div>
-                    </div>
-                    <!-- Fake Button -->
-                    <button class="bg-gray-800 dark:bg-primary text-white text-sm px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-700 dark:hover:bg-blue-600 transition shadow-sm">
-                        <span>📋</span> Copy AI Prompt to Clipboard
-                    </button>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- WORD'S ADD-IN SECTION -->
-    <section id="word-addin" class="py-20 bg-slate-900 text-white scroll-mt-12">
-        <!-- ... (Unchanged Word Add-in section) ... -->
-        <div class="container mx-auto px-6">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-900 text-blue-300 uppercase tracking-wider">Seamless Integration</span>
-                <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-4">Literature Matrix: Word Add-in Guide</h2>
-                <p class="text-slate-400">Everything you need to write, cite, and format directly within Microsoft Word.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">1</div>
-                    <h3 class="text-xl font-bold mb-3">Getting Started</h3>
-                    <ul class="text-slate-300 text-sm space-y-2">
-                        <li><strong class="text-white">Open Literature Matrix:</strong> Launches main application to manage master database.</li>
-                        <li><strong class="text-white">Help:</strong> Opens this user guide.</li>
-                    </ul>
-                </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">2</div>
-                    <h3 class="text-xl font-bold mb-3">Library Setting Group</h3>
-                    <ul class="text-slate-300 text-sm space-y-2">
-                        <li><strong class="text-white">Current Library:</strong> Dropdown to switch active database files.</li>
-                        <li><strong class="text-white">Open/Switch Library:</strong> Manually browse & select database files.</li>
-                        <li><strong class="text-white">Refresh Citation & Bibliography:</strong> Immediate sync + Auto Refresh toggle.</li>
-                    </ul>
-                </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">3</div>
-                    <h3 class="text-xl font-bold mb-3">Appearance</h3>
-                    <ul class="text-slate-300 text-sm space-y-2">
-                        <li><strong class="text-white">Themes:</strong> Light, Dark, Blue, Emerald, Sunset.</li>
-                        <li><strong class="text-white">Transparent Overlay:</strong> 50%, 75%, 95%, 100%.</li>
-                        <li><strong class="text-white">Box Shape:</strong> Round Box or Card Box.</li>
-                        <li><strong class="text-white">Text Size:</strong> Auto, Small, Medium, Large.</li>
-                        <li><strong class="text-white">Search Options:</strong> Author+Year+Title, All Columns, Custom Match Highlight Colors.</li>
-                    </ul>
-                </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">4</div>
-                    <h3 class="text-xl font-bold mb-3">Space & Indent</h3>
-                    <ul class="text-slate-300 text-sm space-y-2">
-                        <li><strong class="text-white">Paragraph Spacing:</strong> Single, 1.5, Double, At least, Exactly, Multiple.</li>
-                        <li><strong class="text-white">Special Indents:</strong> None, First line, or Hanging indents.</li>
-                        <li><strong class="text-white">By Measurement:</strong> Custom inches (e.g., 0.25" to 1.5").</li>
-                    </ul>
-                </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">5</div>
-                    <h3 class="text-xl font-bold mb-3">Font & Style</h3>
-                    <ul class="text-slate-300 text-sm space-y-2">
-                        <li><strong class="text-white">Font & Size:</strong> Custom font face and point sizes for bibliography.</li>
-                        <li><strong class="text-white">Heading Title:</strong> "None", "Bibliography", "References", "Works Cited".</li>
-                        <li><strong class="text-white">List Style:</strong> Bullets, Numeric (1), [1], (1), or custom list formatting.</li>
-                    </ul>
-                </div>
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">6</div>
-                    <h3 class="text-xl font-bold mb-3">Citation & Hyperlink</h3>
-                    <ul class="text-slate-300 text-sm space-y-2">
-                        <li><strong class="text-white">Styles:</strong> APA, MLA, Chicago, Harvard, Vancouver.</li>
-                        <li><strong class="text-white">Format:</strong> Author (year) or (Author, year).</li>
-                        <li><strong class="text-white">Hyperlinks:</strong> Active two-way links & back-references.</li>
-                        <li><strong class="text-white">Cite Button:</strong> Quick Search trigger (<code class="bg-slate-900 px-1 py-0.5 rounded text-blue-400">Alt+C</code>).</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8 mb-16">
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
-                        <span class="text-red-400 text-2xl">📄</span> 7. Save As PDF
-                    </h3>
-                    <p class="text-slate-300 text-sm leading-relaxed">
-                        Instantly cleans up Word field shading and exports your document layout cleanly to PDF while preserving bookmarks and active hyperlinked citations.
-                    </p>
-                <!-- Right-Click Context Menu -->
-                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                    <h3 class="text-xl font-bold mb-3 flex items-center gap-2">
-                        <span class="text-blue-400 text-2xl">🖱️</span> 8. Right-Click Context Menu
-                    </h3>
-                    <ul class="text-slate-300 text-sm space-y-1.5">
-                        <li>• <strong class="text-white">Edit Format:</strong> Switch between Author (year) & (Author, year).</li>
-                        <li>• <strong class="text-white">Edit Prefix/Suffix:</strong> Add custom text (e.g., "see", "p. 67").</li>
-                        <li>• <strong class="text-white">Edit Reference:</strong> Open master database to edit source details.</li>
-                        <li>• <strong class="text-white">Switch Library & Refresh:</strong> Quickly re-sync references on demand.</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div id="addin-shortcuts" class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700 scroll-mt-24">
-                <h3 class="text-2xl font-bold mb-6 text-center">9. Word Add-in Shortcuts at a Glance</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-slate-300">
-                        <thead class="bg-slate-900 text-slate-100 uppercase text-xs font-semibold">
-                            <tr>
-                                <th class="px-6 py-4 rounded-l-lg">Shortcut Key</th>
-                                <th class="px-6 py-4 rounded-r-lg">Action Description</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-700">
-                            <tr>
-                                <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + A</td>
-                                <td class="px-6 py-4">Switch between Literature Matrix app and Word, auto-selecting current library.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + C</td>
-                                <td class="px-6 py-4">Open Quick Cite search form directly at current cursor location.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + S</td>
-                                <td class="px-6 py-4">Jump focus directly to the Literature Matrix Ribbon tab in Word.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + Z</td>
-                                <td class="px-6 py-4">Change selected citation format to <code class="text-slate-100 font-sans">Author (year)</code>.</td>
-                            </tr>
-                            <tr>
-                                <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + X</td>
-                                <td class="px-6 py-4">Change selected citation format to <code class="text-slate-100 font-sans">(Author, year)</code>.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- PRICING SECTION -->
-    <section id="pricing" class="py-20 bg-white dark:bg-darkbg border-b border-gray-100 dark:border-slate-800 transition-colors duration-300 scroll-mt-12">
-        <div class="container mx-auto px-6 max-w-6xl">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">Simple & Transparent</span>
-                <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-4 text-slate-900 dark:text-white">Pricing Plans</h2>
-                <p class="text-gray-600 dark:text-gray-400">Choose the plan that best fits your research needs. All plans include full access to the Desktop App and Word Add-in.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
-                <!-- 1 Month -->
-                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
-                    <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$15</div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                    <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
-                </div>
-
-                <!-- 3 Months -->
-                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">3 Months</h3>
-                    <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$35</div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                    <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
-                </div>
-
-                <!-- 6 Months -->
-                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
-                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular</div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
-                    <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$70</div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                    <a href="#" class="block w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</a>
-                </div>
-
-                <!-- 1 Year -->
-                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Year</h3>
-                    <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$140</div>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                    <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
-                </div>
-
-                <!-- Lifetime -->
-                <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition transform lg:-translate-y-4">
-                    <div class="text-yellow-400 text-2xl mb-2">👑</div>
-                    <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
-                    <div class="text-3xl font-extrabold text-white mb-4">$299</div>
-                    <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
-                    <a href="#" class="block w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- HOW-TO (VIDEOS) SECTION -->
-    <section id="how-to" class="py-20 bg-slate-50 dark:bg-darkcard transition-colors duration-300 scroll-mt-12">
-        <div class="container mx-auto px-6 max-w-6xl">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Video Tutorials & Guides</h2>
-                <p class="text-gray-600 dark:text-gray-400">Learn how to maximize your research productivity with these step-by-step guides.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Video 1 -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
-                    <div class="aspect-video">
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/F-evEItWGEU" title="Literature Matrix Tutorial 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Getting Started: Installation & Setup</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Learn how to install the app and configure the Word Add-in.</p>
-                    </div>
-                </div>
-
-                <!-- Video 2 -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
-                    <div class="aspect-video">
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/IAh0ojWnsTs" title="Literature Matrix Tutorial 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Mastering the Central Database</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">How to import RIS/BibTeX files and organize your literature.</p>
-                    </div>
-                </div>
-
-                <!-- Video 3 -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
-                    <div class="aspect-video">
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/gA3o2MlnPBQ" title="Literature Matrix Tutorial 3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Word Add-in: Citing & Formatting</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Using Alt+C, customizing styles, and generating bibliographies.</p>
-                    </div>
-                </div>
-
-                <!-- Video 4 -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
-                    <div class="aspect-video">
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/0dJj3XpTey0" title="Literature Matrix Tutorial 4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Using the AI Prompt Generator</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Speed up your workflow by generating prompts for external LLMs.</p>
-                    </div>
-                </div>
-                
-                <!-- Video 5 -->
-                <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
-                    <div class="aspect-video">
-                        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/NRqNQ4jJ_Ro" title="Literature Matrix Tutorial 5" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="p-4">
-                        <h4 class="font-bold text-slate-900 dark:text-white mb-1">Advanced Features: Mindmaps & Analytics</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Visualizing your database connections and research trends.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- DOWNLOAD & UPDATE SECTION -->
-    <section id="download" class="py-20 bg-white dark:bg-darkbg transition-colors duration-300 scroll-mt-12 border-t border-gray-100 dark:border-slate-800">
-        <div class="container mx-auto px-6 max-w-4xl">
+        <!-- ============================================== -->
+        <!-- VIRTUAL PAGE 1: HOME (Hero + Overview + Add-In) -->
+        <!-- ============================================== -->
+        <div id="page-home" class="page-view block">
             
-            <!-- Download Top Area -->
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Download & Updates</h2>
-                <p class="text-gray-600 dark:text-gray-400 mb-8">Get the latest standalone Literature Matrix desktop client and Word Ribbon Add-in bundle. Start organizing your research today.</p>
-                
-                <div class="bg-white dark:bg-darkcard border border-blue-200 dark:border-slate-700 p-8 rounded-2xl shadow-lg shadow-blue-500/10 dark:shadow-none">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-100 dark:border-slate-700 pb-6">
-                        <div class="text-left">
-                            <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Literature Matrix Bundle</h3>
-                            <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Includes Desktop App + Word Add-in + Sample Database</p>
+            <!-- Hero Section -->
+            <header class="container mx-auto px-6 pt-16 pb-20 text-center">
+                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">All-in-One Literature & Citation Tool</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-6 mb-6 text-slate-900 dark:text-white">
+                    Master Your References with <span class="text-primary dark:text-blue-400">Literature Matrix</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+                    Organize over 40+ reference types, manage master database libraries, and seamlessly insert formatted citations into Microsoft Word with active hyperlinking and custom quick-search controls.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button onclick="switchPage('page-download')" class="bg-primary text-white px-8 py-3.5 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-500/20">Download Literature Matrix</button>
+                    <button onclick="switchPage('page-home', 'word-addin')" class="bg-white dark:bg-darkcard border border-gray-300 dark:border-slate-700 text-slate-700 dark:text-gray-200 px-8 py-3.5 rounded-xl text-lg font-semibold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Explore Word Add-in</button>
+                </div>
+            </header>
+
+            <!-- MAIN APP OVERVIEW -->
+            <section id="features" class="py-16 bg-white dark:bg-darkbg border-t border-gray-100 dark:border-slate-800 transition-colors duration-300 scroll-mt-12">
+                <div class="container mx-auto px-6">
+                    <div class="text-center max-w-2xl mx-auto mb-16">
+                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Section I — Main App Overview</h2>
+                        <p class="text-gray-600 dark:text-gray-400">A powerful central database and built-in browser engine to collect, analyze, and visualize research papers effortlessly.</p>
+                    </div>
+
+                    <!-- Feature 1: Imports & Reference Types -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center mb-16">
+                        <div class="space-y-6 order-1 lg:order-1">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">1. 40+ Reference Types & Master Imports</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">Support for over 40 distinct publication types. Import existing references via RIS, BibTeX (.bib), or EndNote (.enw).</p>
+                                <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">
+                                    <strong>Advanced Options:</strong> Users can add custom fields and toggle advanced tracking (Methodology, Findings, Gaps, Contributions) even for non-research types like Books or Book Chapters.
+                                </p>
+                            </div>
                         </div>
-                        <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-sm font-bold px-4 py-1.5 rounded-full">v4.0.0.2 Latest</span>
+                        <!-- CSS Visual: Scrolling Tag Cloud -->
+                        <div class="bg-slate-50 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col p-4 shadow-inner overflow-hidden relative order-2 lg:order-2 w-full">
+                            <div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-50 dark:from-darkcard to-transparent z-10 pointer-events-none"></div>
+                            <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3">Supported Types</h4>
+                            <div class="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-8">
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Journal Article</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Conference Paper</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Web Page</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Thesis</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Generic</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Artwork</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Audio Recording</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Blog Post</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Case</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Computer Program</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dataset</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dictionary Entry</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Document</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">E-mail</span>
+                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Encyclopedia</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: Filters & Export -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center mb-16">
+                        <!-- Text First in HTML for Mobile Stacking -->
+                        <div class="space-y-6 order-1 lg:order-2 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl w-full">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">2. Advanced Filtering & Multi-Format Export</h3>
+                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
+                                    <li>• <strong>Filter by:</strong> Custom Theme, Type of Reference, or use the global searching box.</li>
+                                    <li>• <strong>Visual Searching:</strong> Toggle Keyword Highlight matching in search results.</li>
+                                    <li>• <strong>Customize View:</strong> Selectively show or hide specific matrix columns.</li>
+                                </ul>
+                                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Export references seamlessly to DOCX, RIS, BibTeX, or ENW formats.</p>
+                            </div>
+                        </div>
+                        <!-- CSS Visual: Filter UI Mockup -->
+                        <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col p-4 shadow-sm w-full order-2 lg:order-1 relative overflow-hidden">
+                            <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center">
+                                <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900">
+                                    <span class="text-gray-400 text-xs mr-2">🔍</span>
+                                    <span class="text-xs text-gray-500 font-medium font-mono">Ctrl+F Search...</span>
+                                </div>
+                                <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900">All Themes ▾</div>
+                                <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900">All Types ▾</div>
+                            </div>
+                            <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-sm overflow-hidden flex flex-col">
+                                <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700">
+                                    <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700">AUTHOR</div>
+                                    <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700">YEAR</div>
+                                    <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2]">TITLE</div>
+                                </div>
+                                <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20">
+                                    <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700">Smith, J.</div>
+                                    <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700">2024</div>
+                                    <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2]"><span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Literature</span> Review on AI</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Mindmap Visualization -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center mb-16">
+                        <div class="space-y-6 order-1 lg:order-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl w-full">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">3. Interactive Mindmap</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">Visualize literature connections instantly with 5 dynamic chart layouts: Hierarchical map, Tree (horizontal/vertical), Spider Web, and SunBurst.</p>
+                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
+                                    <li>• <strong>Sort Nodes by:</strong> Theme, Author, Year, or Methodology.</li>
+                                    <li>• <strong>Fully Customizable:</strong> Adjust font sizes, box styles, and connector lines to create publication-ready diagrams.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- CSS Visual: Mindmap Mockup mimicking ECharts -->
+                        <div class="bg-[#f8fafc] dark:bg-[#0f172a] rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col overflow-hidden relative shadow-sm w-full order-2 lg:order-2">
+                            <!-- Fake ECharts Control Bar -->
+                            <div class="bg-white dark:bg-[#1e293b] border-b border-gray-200 dark:border-slate-700 h-10 px-3 flex items-center gap-3 z-10 shadow-sm">
+                                <div class="flex items-center gap-1"><span class="text-[10px] font-bold text-slate-500">Type:</span><div class="h-4 w-20 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded"></div></div>
+                                <div class="flex items-center gap-1"><span class="text-[10px] font-bold text-slate-500">Group By:</span><div class="h-4 w-16 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded"></div></div>
+                            </div>
+                            <!-- Node Map -->
+                            <div class="flex-1 relative" style="background-image: radial-gradient(var(--tw-colors-slate-300) 1px, transparent 0); background-size: 20px 20px;">
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="relative w-full max-w-xs h-full flex items-center justify-center">
+                                        <div class="absolute w-20 h-0.5 bg-[#5470c6] transform rotate-[35deg] translate-x-14 -translate-y-8 origin-left"></div>
+                                        <div class="absolute w-20 h-0.5 bg-[#91cc75] transform -rotate-[35deg] translate-x-14 translate-y-8 origin-left"></div>
+                                        <div class="absolute w-20 h-0.5 bg-[#fac858] transform rotate-[145deg] -translate-x-14 -translate-y-8 origin-right"></div>
+                                        <div class="z-10 bg-[#1e293b] dark:bg-white text-white dark:text-[#1e293b] px-3 py-1.5 rounded shadow-md text-xs font-bold border-2 border-[#1e293b] dark:border-white">Literature Matrix</div>
+                                        <div class="absolute top-10 right-6 bg-white dark:bg-[#1e293b] px-2 py-1 rounded shadow border-2 border-[#5470c6] text-[10px] font-bold text-slate-700 dark:text-gray-200">AI Methodology</div>
+                                        <div class="absolute bottom-10 right-6 bg-white dark:bg-[#1e293b] px-2 py-1 rounded shadow border-2 border-[#91cc75] text-[10px] font-bold text-slate-700 dark:text-gray-200">Clinical Data</div>
+                                        <div class="absolute top-10 left-6 bg-white dark:bg-[#1e293b] px-2 py-1 rounded shadow border-2 border-[#fac858] text-[10px] font-bold text-slate-700 dark:text-gray-200">Smith (2024)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 4: Analytics -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center mb-16">
+                        <!-- Text First in HTML for Mobile Stacking -->
+                        <div class="space-y-6 order-1 lg:order-2 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl w-full">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">4. Data Analytics</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">Uncover patterns in your literature database with distinct analytical views:</p>
+                                <ul class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
+                                    <li>📊 Publication Trends</li>
+                                    <li>📊 Methodological Distribution</li>
+                                    <li>📊 Journal Impact (Q-Rank)</li>
+                                    <li>📊 Top Authors</li>
+                                </ul>
+                                <p class="text-xs text-slate-500 font-medium">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
+                            </div>
+                        </div>
+                        <!-- CSS Visual: Analytics 2x2 Dashboard Mockup -->
+                        <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col p-2 shadow-sm w-full order-2 lg:order-1">
+                            <div class="bg-white dark:bg-slate-800 h-8 rounded mb-2 border border-gray-200 dark:border-slate-600 flex items-center px-2 gap-2">
+                                <span class="text-[10px] font-bold text-slate-500">View Mode:</span>
+                                <div class="h-4 w-24 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded"></div>
+                            </div>
+                            <div class="flex-1 grid grid-cols-2 grid-rows-2 gap-2">
+                                <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5">
+                                    <div class="text-[8px] font-bold text-slate-700 dark:text-slate-300 mb-1">Publication Trends</div>
+                                    <div class="flex-1 flex items-end gap-1 px-2">
+                                        <div class="w-full bg-[#5470c6] rounded-t h-[40%]"></div><div class="w-full bg-[#5470c6] rounded-t h-[70%]"></div><div class="w-full bg-[#5470c6] rounded-t h-[50%]"></div>
+                                    </div>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5 items-center justify-center relative">
+                                    <div class="absolute top-1.5 left-1.5 text-[8px] font-bold text-slate-700 dark:text-slate-300">Journal Impact</div>
+                                    <div class="w-12 h-12 rounded-full border-4 border-[#91cc75] border-t-[#fac858] border-r-[#ee6666]"></div>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5">
+                                    <div class="text-[8px] font-bold text-slate-700 dark:text-slate-300 mb-1">Methodology</div>
+                                    <div class="flex-1 relative">
+                                        <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none"><path d="M0,20 Q10,10 20,20 T40,15 T60,25" fill="none" stroke="#fac858" stroke-width="2"/></svg>
+                                    </div>
+                                </div>
+                                <div class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded flex flex-col p-1.5">
+                                    <div class="text-[8px] font-bold text-slate-700 dark:text-slate-300 mb-1">Top Authors</div>
+                                    <div class="flex-1 flex flex-col gap-1 justify-center">
+                                        <div class="h-1.5 bg-[#73c0de] rounded w-full"></div>
+                                        <div class="h-1.5 bg-[#73c0de] rounded w-[80%]"></div>
+                                        <div class="h-1.5 bg-[#73c0de] rounded w-[60%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 5: Main App Shortcuts -->
+                    <div id="app-shortcuts" class="mb-16 scroll-mt-24">
+                        <div class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto">
+                            <h3 class="text-2xl font-bold mb-2 text-center text-white">5. Main Application Shortcuts</h3>
+                            <p class="text-slate-400 text-center text-sm mb-6">Work faster with these global hotkeys in the Literature Matrix UI.</p>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                    <span class="text-sm text-slate-300">Add Literature</span>
+                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + L</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                    <span class="text-sm text-slate-300">Edit Literature</span>
+                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + E</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                    <span class="text-sm text-slate-300">Copy Citation <span class="text-[10px] text-slate-500">(multi-select)</span></span>
+                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + C</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                    <span class="text-sm text-slate-300">Export Literature <span class="text-[10px] text-slate-500">(multi-select)</span></span>
+                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + S</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                    <span class="text-sm text-slate-300">Export Entire Matrix to Excel</span>
+                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + X</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                    <span class="text-sm text-slate-300">Delete Row <span class="text-[10px] text-slate-500">(multi-select)</span></span>
+                                    <code class="font-mono text-red-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Del</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-slate-700 pb-2 sm:col-span-2">
+                                    <span class="text-sm text-slate-300">Open Visualizers</span>
+                                    <div class="flex gap-2">
+                                        <code class="font-mono text-emerald-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + M (Mindmap)</code>
+                                        <code class="font-mono text-purple-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + T (Analytics)</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 6: Internal Browser (Text Left, Visual Right) -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center mb-16">
+                        <div class="space-y-6 order-1 lg:order-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">6. Internal Research Browser</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-3">Browse online literature directly inside Literature Matrix without leaving the environment. Allows rapid metadata extraction straight into your database.</p>
+                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
+                                    <li>• <strong>Live Q-Rank:</strong> Instantly overlay journal impact rankings (Q1-Q4) directly onto Google Scholar search results.</li>
+                                    <li>• <strong>Sci-Hub Integration:</strong> Built-in support for resolving DOIs on any website and Google Scholar.</li>
+                                    <li>• Flexibly toggle these overlay features ON or OFF globally.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- CSS Mockup: Browser Window -->
+                        <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col overflow-hidden shadow-sm w-full order-2 lg:order-2">
+                            <div class="bg-gray-200 dark:bg-slate-800 h-10 w-full flex items-center px-3 gap-3 border-b border-gray-300 dark:border-slate-600">
+                                <div class="flex gap-1.5"><div class="w-3 h-3 rounded-full bg-red-400"></div><div class="w-3 h-3 rounded-full bg-yellow-400"></div><div class="w-3 h-3 rounded-full bg-green-400"></div></div>
+                                <div class="bg-white dark:bg-slate-700 h-6 flex-1 rounded text-[10px] text-gray-500 flex items-center px-2 font-mono">scholar.google.com</div>
+                                <div class="flex gap-2">
+                                    <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">Q-RANK</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
+                                    <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">SCI-HUB</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
+                                </div>
+                            </div>
+                            <div class="flex-1 p-5 bg-white dark:bg-slate-900 flex flex-col gap-3 relative">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-5 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+                                    <span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">Q1</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
+                                <div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded"></div>
+                                <div class="absolute bottom-4 left-4 bg-orange-100 text-orange-800 border border-orange-200 text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1"><span>🔓</span> Open via Sci-Hub</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 7: Themes (Text First for Mobile Stacking) -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center mb-16">
+                        <div class="space-y-6 order-1 lg:order-2 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl w-full">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">7. App Appearance & Themes</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Work comfortably in any lighting condition. Choose between a crisp <strong>Light mode</strong>, a sleek <strong>Dark mode</strong> to reduce eye strain during late-night research sessions, or set it to match your <strong>System</strong> default automatically.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 w-full order-2 lg:order-1">
+                            <div class="bg-slate-100 rounded-xl border border-gray-200 h-48 flex flex-col items-center justify-center p-4 shadow-sm">
+                                <span class="text-4xl mb-2 drop-shadow-md">☀️</span>
+                                <p class="text-slate-700 font-bold text-sm">Light Theme</p>
+                            </div>
+                            <div class="bg-[#1e293b] rounded-xl border border-slate-700 h-48 flex flex-col items-center justify-center p-4 shadow-sm">
+                                <span class="text-4xl mb-2 drop-shadow-md">🌙</span>
+                                <p class="text-slate-200 font-bold text-sm">Dark Theme</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 8: AI Prompts (Text Left, Visual Right) -->
+                    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-12 items-center w-full">
+                        <div class="space-y-6 order-1 lg:order-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl relative overflow-hidden w-full">
+                                <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 text-6xl">🤖</div>
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">8. AI Prompt Generator</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">Bridge the gap between your library and AI assistants. Automatically generate highly optimized instructions for LLMs based on single or batch papers in your database.</p>
+                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
+                                    <li>• Request formatted <strong>RIS</strong> or <strong>BibTeX</strong> data extraction.</li>
+                                    <li>• Generate instructions for deep <strong>Paper Summarization</strong>.</li>
+                                    <li>• Process <strong>Single Papers</strong> or massive <strong>Batch Extracts</strong>.</li>
+                                </ul>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Just copy the generated prompt to your clipboard and paste it directly into tools like <span class="text-primary dark:text-blue-400">Google NotebookLM</span>, <span class="text-primary dark:text-blue-400">Jenni AI</span>, or <span class="text-primary dark:text-blue-400">Claude</span> alongside your uploaded PDFs.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-64 flex flex-col items-center justify-center p-6 text-center shadow-sm w-full order-2 lg:order-2">
+                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 w-full mb-4 relative">
+                                <p class="text-left text-[10px] font-mono text-gray-500 dark:text-gray-400 mb-2">"Summarize the following papers focusing on methodology and gaps..."</p>
+                                <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-full mb-1.5"></div>
+                                <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-5/6 mb-1.5"></div>
+                                <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-4/6"></div>
+                            </div>
+                            <button class="bg-gray-800 dark:bg-primary text-white text-sm px-4 py-2 rounded flex items-center gap-2 hover:bg-gray-700 dark:hover:bg-blue-600 transition shadow-sm">
+                                <span>📋</span> Copy AI Prompt to Clipboard
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- WORD'S ADD-IN SECTION -->
+            <section id="word-addin" class="py-20 bg-slate-900 text-white scroll-mt-12">
+                <div class="container mx-auto px-6">
+                    <div class="text-center max-w-3xl mx-auto mb-16">
+                        <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-900 text-blue-300 uppercase tracking-wider">Seamless Integration</span>
+                        <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-4">Literature Matrix: Word Add-in Guide</h2>
+                        <p class="text-slate-400">Everything you need to write, cite, and format directly within Microsoft Word.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">1</div>
+                            <h3 class="text-xl font-bold mb-3">Getting Started</h3>
+                            <ul class="text-slate-300 text-sm space-y-2">
+                                <li><strong class="text-white">Open Literature Matrix:</strong> Launches main application to manage master database.</li>
+                                <li><strong class="text-white">Help:</strong> Opens this user guide.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">2</div>
+                            <h3 class="text-xl font-bold mb-3">Library Setting Group</h3>
+                            <ul class="text-slate-300 text-sm space-y-2">
+                                <li><strong class="text-white">Current Library:</strong> Dropdown to switch active database files.</li>
+                                <li><strong class="text-white">Open/Switch Library:</strong> Manually browse & select database files.</li>
+                                <li><strong class="text-white">Refresh Citation & Bibliography:</strong> Immediate sync + Auto Refresh toggle.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">3</div>
+                            <h3 class="text-xl font-bold mb-3">Appearance</h3>
+                            <ul class="text-slate-300 text-sm space-y-2">
+                                <li><strong class="text-white">Themes:</strong> Light, Dark, Blue, Emerald, Sunset.</li>
+                                <li><strong class="text-white">Transparent Overlay:</strong> 50%, 75%, 95%, 100%.</li>
+                                <li><strong class="text-white">Box Shape:</strong> Round Box or Card Box.</li>
+                                <li><strong class="text-white">Text Size:</strong> Auto, Small, Medium, Large.</li>
+                                <li><strong class="text-white">Search Options:</strong> Author+Year+Title, All Columns, Custom Match Highlight Colors.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">4</div>
+                            <h3 class="text-xl font-bold mb-3">Space & Indent</h3>
+                            <ul class="text-slate-300 text-sm space-y-2">
+                                <li><strong class="text-white">Paragraph Spacing:</strong> Single, 1.5, Double, At least, Exactly, Multiple.</li>
+                                <li><strong class="text-white">Special Indents:</strong> None, First line, or Hanging indents.</li>
+                                <li><strong class="text-white">By Measurement:</strong> Custom inches (e.g., 0.25" to 1.5").</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">5</div>
+                            <h3 class="text-xl font-bold mb-3">Font & Style</h3>
+                            <ul class="text-slate-300 text-sm space-y-2">
+                                <li><strong class="text-white">Font & Size:</strong> Custom font face and point sizes for bibliography.</li>
+                                <li><strong class="text-white">Heading Title:</strong> "None", "Bibliography", "References", "Works Cited".</li>
+                                <li><strong class="text-white">List Style:</strong> Bullets, Numeric (1), [1], (1), or custom list formatting.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4">6</div>
+                            <h3 class="text-xl font-bold mb-3">Citation & Hyperlink</h3>
+                            <ul class="text-slate-300 text-sm space-y-2">
+                                <li><strong class="text-white">Styles:</strong> APA, MLA, Chicago, Harvard, Vancouver.</li>
+                                <li><strong class="text-white">Format:</strong> Author (year) or (Author, year).</li>
+                                <li><strong class="text-white">Hyperlinks:</strong> Active two-way links & back-references.</li>
+                                <li><strong class="text-white">Cite Button:</strong> Quick Search trigger (<code class="bg-slate-900 px-1 py-0.5 rounded text-blue-400">Alt+C</code>).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8 mb-16">
+                        <!-- PDF Export -->
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 text-white">7</div>
+                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">Save As PDF</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed">
+                                Instantly cleans up Word field shading and exports your document layout cleanly to PDF while preserving bookmarks and active hyperlinked citations.
+                            </p>
+                        </div>
+
+                        <!-- Right-Click Context Menu -->
+                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 text-white">8</div>
+                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">Right-Click Context Menu</h3>
+                            <ul class="text-slate-300 text-sm space-y-1.5">
+                                <li>• <strong class="text-white">Edit Format:</strong> Switch between Author (year) & (Author, year).</li>
+                                <li>• <strong class="text-white">Edit Prefix/Suffix:</strong> Add custom text (e.g., "see", "p. 67").</li>
+                                <li>• <strong class="text-white">Edit Reference:</strong> Open master database to edit source details.</li>
+                                <li>• <strong class="text-white">Switch Library & Refresh:</strong> Quickly re-sync references on demand.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="addin-shortcuts" class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700 scroll-mt-24">
+                        <h3 class="text-2xl font-bold mb-6 text-center">9. Word Add-in Shortcuts at a Glance</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-300">
+                                <thead class="bg-slate-900 text-slate-100 uppercase text-xs font-semibold">
+                                    <tr>
+                                        <th class="px-6 py-4 rounded-l-lg">Shortcut Key</th>
+                                        <th class="px-6 py-4 rounded-r-lg">Action Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-700">
+                                    <tr>
+                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + A</td>
+                                        <td class="px-6 py-4">Switch between Literature Matrix app and Word, auto-selecting current library.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + C</td>
+                                        <td class="px-6 py-4">Open Quick Cite search form directly at current cursor location.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + S</td>
+                                        <td class="px-6 py-4">Jump focus directly to the Literature Matrix Ribbon tab in Word.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + Z</td>
+                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-100 font-sans">Author (year)</code>.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + X</td>
+                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-100 font-sans">(Author, year)</code>.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIRTUAL PAGE 2: PRICING -->
+        <!-- ============================================== -->
+        <div id="page-pricing" class="page-view hidden min-h-screen pt-16 pb-20 bg-white dark:bg-darkbg transition-colors duration-300">
+            <div class="container mx-auto px-6 max-w-6xl">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">Simple & Transparent</span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-4 text-slate-900 dark:text-white">Pricing Plans</h2>
+                    <p class="text-gray-600 dark:text-gray-400">Choose the plan that best fits your research needs. All plans include full access to the Desktop App and Word Add-in.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
+                    <!-- 1 Month -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
+                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$15</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+                        <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
+                    </div>
+
+                    <!-- 3 Months -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">3 Months</h3>
+                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$35</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+                        <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
+                    </div>
+
+                    <!-- 6 Months -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular</div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
+                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$70</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+                        <a href="#" class="block w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</a>
+                    </div>
+
+                    <!-- 1 Year -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Year</h3>
+                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$140</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+                        <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
+                    </div>
+
+                    <!-- Lifetime -->
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition transform lg:-translate-y-4 mt-6 lg:mt-0">
+                        <div class="text-yellow-400 text-2xl mb-2">👑</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
+                        <div class="text-3xl font-extrabold text-white mb-4">$299</div>
+                        <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
+                        <a href="#" class="block w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- VIRTUAL PAGE 3: TUTORIALS -->
+        <!-- ============================================== -->
+        <div id="page-tutorials" class="page-view hidden min-h-screen pt-16 pb-20 bg-slate-50 dark:bg-darkcard transition-colors duration-300">
+            <div class="container mx-auto px-6 max-w-6xl">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Video Tutorials & Guides</h2>
+                    <p class="text-gray-600 dark:text-gray-400">Learn how to maximize your research productivity with these step-by-step guides.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Video 1 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
+                        <div class="aspect-video">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/F-evEItWGEU" title="Literature Matrix Tutorial 1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Getting Started: Installation & Setup</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Learn how to install the app and configure the Word Add-in.</p>
+                        </div>
+                    </div>
+
+                    <!-- Video 2 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
+                        <div class="aspect-video">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/IAh0ojWnsTs" title="Literature Matrix Tutorial 2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Mastering the Central Database</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">How to import RIS/BibTeX files and organize your literature.</p>
+                        </div>
+                    </div>
+
+                    <!-- Video 3 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
+                        <div class="aspect-video">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/gA3o2MlnPBQ" title="Literature Matrix Tutorial 3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Word Add-in: Citing & Formatting</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Using Alt+C, customizing styles, and generating bibliographies.</p>
+                        </div>
+                    </div>
+
+                    <!-- Video 4 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
+                        <div class="aspect-video">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/0dJj3XpTey0" title="Literature Matrix Tutorial 4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Using the AI Prompt Generator</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Speed up your workflow by generating prompts for external LLMs.</p>
+                        </div>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row justify-center gap-4">
-                        <a href="#" class="bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
-                            <span>⬇️</span> Download Installer (.exe)
-                        </a>
-                        <a href="#" class="bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-600 text-slate-700 dark:text-gray-200 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-slate-500 transition shadow-sm flex items-center justify-center gap-2">
-                            <span>📦</span> Download Portable (.zip)
-                        </a>
-                    </div>
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">Compatible with Windows 10 & 11. Requires Microsoft Word 2016 or newer.</p>
-                </div>
-            </div>
-
-            <!-- Changelog Bottom Area -->
-            <div class="mt-16">
-                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                    <span>📝</span> Release History & Changelog
-                </h3>
-                
-                <div class="space-y-6">
-                    <!-- Version 4.0.0.2 -->
-                    <div class="bg-white dark:bg-darkcard border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold text-primary dark:text-blue-400">Version 4.0.0.2</h4>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Latest Release</span>
+                    <!-- Video 5 -->
+                    <div class="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-slate-700">
+                        <div class="aspect-video">
+                            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/NRqNQ4jJ_Ro" title="Literature Matrix Tutorial 5" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                         </div>
-                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 text-sm space-y-2">
-                            <li>Added AI Prompt Generator for single and batch papers (RIS/Bib/Summaries).</li>
-                            <li>Introduced robust Theme engine (Light, Dark, System modes).</li>
-                            <li>Optimized large document handling for Word documents with 550,000+ characters (50+ pages).</li>
-                            <li>Improved font rendering and UI layout alignments.</li>
-                        </ul>
-                    </div>
-
-                    <!-- Previous Version Outline -->
-                    <div class="bg-white dark:bg-darkcard border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm opacity-80">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-bold text-slate-700 dark:text-gray-300">Version 3.x Updates</h4>
-                            <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Previous Branch</span>
+                        <div class="p-4">
+                            <h4 class="font-bold text-slate-900 dark:text-white mb-1">Advanced Features: Mindmaps & Analytics</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Visualizing your database connections and research trends.</p>
                         </div>
-                        <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 text-sm space-y-2">
-                            <li>Introduced Internal Browser for rapid metadata extraction.</li>
-                            <li>Added multi-format export capabilities (DOCX, RIS, BibTeX).</li>
-                            <li>Enhanced citation hyperlink engine and back-referencing.</li>
-                        </ul>
                     </div>
                 </div>
             </div>
-
         </div>
-    </section>
+
+        <!-- ============================================== -->
+        <!-- VIRTUAL PAGE 4: DOWNLOAD -->
+        <!-- ============================================== -->
+        <div id="page-download" class="page-view hidden min-h-screen pt-16 pb-20 bg-white dark:bg-darkbg transition-colors duration-300">
+            <div class="container mx-auto px-6 max-w-4xl">
+                
+                <!-- Download Top Area -->
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-extrabold text-slate-900 dark:text-white mb-4">Download & Updates</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-8">Get the latest standalone Literature Matrix desktop client and Word Ribbon Add-in bundle. Start organizing your research today.</p>
+                    
+                    <div class="bg-white dark:bg-darkcard border border-blue-200 dark:border-slate-700 p-8 rounded-2xl shadow-lg shadow-blue-500/10 dark:shadow-none">
+                        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-100 dark:border-slate-700 pb-6">
+                            <div class="text-left">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Literature Matrix Bundle</h3>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Includes Desktop App + Word Add-in + Sample Database</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-sm font-bold px-4 py-1.5 rounded-full">v4.0.0.2 Latest</span>
+                        </div>
+                        
+                        <div class="flex flex-col sm:flex-row justify-center gap-4">
+                            <a href="#" class="bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                                <span>⬇️</span> Download Installer (.exe)
+                            </a>
+                            <a href="#" class="bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-600 text-slate-700 dark:text-gray-200 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-slate-500 transition shadow-sm flex items-center justify-center gap-2">
+                                <span>📦</span> Download Portable (.zip)
+                            </a>
+                        </div>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">Compatible with Windows 10 & 11. Requires Microsoft Word 2016 or newer.</p>
+                    </div>
+                </div>
+
+                <!-- Changelog Bottom Area -->
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+                        <span>📝</span> Release History & Changelog
+                    </h3>
+                    
+                    <div class="space-y-6">
+                        <!-- Version 4.0.0.2 -->
+                        <div class="bg-white dark:bg-darkcard border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-bold text-primary dark:text-blue-400">Version 4.0.0.2</h4>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Latest Release</span>
+                            </div>
+                            <ul class="list-disc list-inside text-gray-600 dark:text-gray-300 text-sm space-y-2">
+                                <li>Added AI Prompt Generator for single and batch papers (RIS/Bib/Summaries).</li>
+                                <li>Introduced robust Theme engine (Light, Dark, System modes).</li>
+                                <li>Optimized large document handling for Word documents with 550,000+ characters (50+ pages).</li>
+                                <li>Improved font rendering and UI layout alignments.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Previous Version Outline -->
+                        <div class="bg-white dark:bg-darkcard border border-gray-200 dark:border-slate-700 rounded-xl p-6 shadow-sm opacity-80">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-bold text-slate-700 dark:text-gray-300">Version 3.x Updates</h4>
+                                <span class="text-sm text-gray-500 dark:text-gray-400 font-medium">Previous Branch</span>
+                            </div>
+                            <ul class="list-disc list-inside text-gray-600 dark:text-gray-400 text-sm space-y-2">
+                                <li>Introduced Internal Browser for rapid metadata extraction.</li>
+                                <li>Added multi-format export capabilities (DOCX, RIS, BibTeX).</li>
+                                <li>Enhanced citation hyperlink engine and back-referencing.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800 mt-auto">
         <div class="container mx-auto px-6">
             <h3 class="text-xl font-bold text-white mb-4">Literature Matrix</h3>
             <div class="flex justify-center space-x-6 mb-8 text-sm">
-                <a href="#features" class="hover:text-white transition">Features</a>
-                <a href="#how-to" class="hover:text-white transition">How-to Guide</a>
-                <a href="#download" class="hover:text-white transition">Download</a>
+                <button onclick="switchPage('page-home')" class="hover:text-white transition">Home</button>
+                <button onclick="switchPage('page-pricing')" class="hover:text-white transition">Pricing</button>
+                <button onclick="switchPage('page-tutorials')" class="hover:text-white transition">How-to Guide</button>
+                <button onclick="switchPage('page-download')" class="hover:text-white transition">Download</button>
             </div>
             <p class="text-xs text-slate-500">© 2026 Literature Matrix. All rights reserved.</p>
         </div>
