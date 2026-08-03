@@ -40,6 +40,16 @@
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             document.getElementById('theme-icon').innerText = isDark ? '☀️' : '🌙';
+            
+            // Re-render charts to adapt to theme if they exist
+            if(window.mindmapPreview) {
+                const labelColor = isDark ? '#f1f5f9' : '#1e293b';
+                window.mindmapPreview.setOption({
+                    series: [{
+                        label: { color: labelColor }
+                    }]
+                });
+            }
         }
         
         // Mobile Menu Logic
@@ -94,7 +104,40 @@
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initLivePreviews();
+            initTableFilter();
+            
+            // Initialize Citation Preview to APA
+            updateCitationFormat('APA');
         });
+
+        // --- Table Filter Logic ---
+        function initTableFilter() {
+            const searchInput = document.getElementById('matrix-search');
+            const typeFilter = document.getElementById('matrix-type-filter');
+            const tableRows = document.querySelectorAll('.matrix-row');
+
+            function filterTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedType = typeFilter.value;
+
+                tableRows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    const type = row.getAttribute('data-type');
+                    
+                    const matchesSearch = text.includes(searchTerm);
+                    const matchesType = selectedType === 'all' || type === selectedType;
+
+                    if (matchesSearch && matchesType) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            searchInput.addEventListener('input', filterTable);
+            typeFilter.addEventListener('change', filterTable);
+        }
 
          // --- Live Preview Initializers & Interaction Logic ---
         function initLivePreviews() {
@@ -103,12 +146,14 @@
             if(mindmapDom) {
                 window.mindmapPreview = echarts.init(mindmapDom);
                 
+                const isDark = document.documentElement.classList.contains('dark');
+                const initialLabelColor = isDark ? '#f1f5f9' : '#1e293b';
+
                 const mindmapData = {
-                    name: 'Chapter 1', // FIX: Root node text updated
-                    itemStyle: { color: '#1e293b', borderColor: '#1e293b' },
-                    // FIX: Removed background and border formatting to make it clean text
+                    name: 'Chapter 1', 
+                    itemStyle: { color: 'transparent', borderColor: 'transparent' },
                     label: { 
-                        color: '#1e293b', 
+                        color: initialLabelColor, 
                         backgroundColor: 'transparent',
                         borderColor: 'transparent',
                         borderWidth: 0,
@@ -226,17 +271,28 @@
             const type = document.getElementById('demo-mindmap-type').value;
             window.mindmapPreview.setOption({
                 series: [{
-                    layout: type === 'radial' ? 'radial' : 'orthogonal',
-                    orient: type === 'radial' ? undefined : 'LR',
-                    left: type === 'radial' ? 'center' : '20%',
-                    right: type === 'radial' ? 'auto' : '20%',
-                    top: type === 'radial' ? 'middle' : '10%',
+                    layout: (type === 'radial' || type === 'sunburst') ? 'radial' : 'orthogonal',
+                    orient: (type === 'radial' || type === 'sunburst') ? undefined : (type === 'tree_vert' ? 'TB' : 'LR'),
+                    left: (type === 'radial' || type === 'sunburst') ? 'center' : '20%',
+                    right: (type === 'radial' || type === 'sunburst') ? 'auto' : '20%',
+                    top: (type === 'radial' || type === 'sunburst') ? 'middle' : '10%',
                 }]
             });
         };
 
-        window.updateAnalyticsDemo = function(overrideType = null) {
-            const type = overrideType || document.getElementById('demo-analytics-type').value;
+        window.updateAnalyticsDemo = function() {
+            const selector = document.getElementById('demo-analytics-type');
+            let type = 'bar'; // default
+            
+            // Map the dropdown selection to an echarts type for the mockup
+            switch(selector.value) {
+                case 'trends': type = 'bar'; break;
+                case 'methods': type = 'pie'; break;
+                case 'impact': type = 'line'; break;
+                case 'authors': type = 'bar'; break;
+                case 'synthesis': type = 'bar'; break; // Default fallback
+            }
+
             const dataVals = [12, 19, 15, 25, 32];
             const dataCats = ['2020', '2021', '2022', '2023', '2024'];
             
@@ -269,6 +325,34 @@
                         itemStyle: { color: '#3b82f6', borderRadius: type === 'bar' ? [4, 4, 0, 0] : 0 }
                     }]
                 }, true);
+            }
+        };
+
+        // --- Interactive Citation Demo Logic ---
+        const citationFormats = {
+            'APA': 'Smith, J. (2024). Literature Review on AI. <i>Journal of Future Tech, 12</i>(4), 45-60. <br/><a href="#" class="text-blue-500 dark:text-[#3b82f6] hover:underline mt-1 inline-block">https://doi.org/10.1234/jft.2024.045</a>',
+            'MLA': 'Smith, John. "Literature Review on AI." <i>Journal of Future Tech</i>, vol. 12, no. 4, 2024, pp. 45-60. <br/><a href="#" class="text-blue-500 dark:text-[#3b82f6] hover:underline mt-1 inline-block">https://doi.org/10.1234/jft.2024.045</a>',
+            'Chicago': 'Smith, John. "Literature Review on AI." <i>Journal of Future Tech</i> 12, no. 4 (2024): 45-60. <br/><a href="#" class="text-blue-500 dark:text-[#3b82f6] hover:underline mt-1 inline-block">https://doi.org/10.1234/jft.2024.045</a>',
+            'Harvard': 'Smith, J. (2024) \'Literature Review on AI\', <i>Journal of Future Tech</i>, 12(4), pp. 45-60. Available at: <br/><a href="#" class="text-blue-500 dark:text-[#3b82f6] hover:underline mt-1 inline-block">https://doi.org/10.1234/jft.2024.045</a> (Accessed: 3 August 2026).',
+            'Vancouver': 'Smith J. Literature Review on AI. Journal of Future Tech. 2024;12(4):45-60. <br/><a href="#" class="text-blue-500 dark:text-[#3b82f6] hover:underline mt-1 inline-block">https://doi.org/10.1234/jft.2024.045</a>'
+        };
+
+        window.updateCitationFormat = function(format) {
+            // Update active button state
+            document.querySelectorAll('.citation-btn').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white', 'border-primary');
+                btn.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200', 'border-gray-200', 'dark:border-slate-600');
+            });
+            const activeBtn = document.getElementById(`cite-btn-${format}`);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200', 'border-gray-200', 'dark:border-slate-600');
+                activeBtn.classList.add('bg-primary', 'text-white', 'border-primary');
+            }
+
+            // Update output text
+            const outputEl = document.getElementById('citation-output');
+            if(outputEl) {
+                outputEl.innerHTML = citationFormats[format] || citationFormats['APA'];
             }
         };
 
@@ -533,58 +617,97 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                 <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-50 dark:from-darkcard to-transparent z-10 pointer-events-none"></div>
                                 <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 shrink-0">Supported Types</h4>
                                 <div class="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-12 content-start flex-grow">
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Journal Article</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book Section</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Conference Paper</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Web Page</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Report</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Thesis</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Generic</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Artwork</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Audio Recording</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Bill</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Blog Post</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Case</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Computer Program</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dataset</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dictionary Entry</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Document</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">E-mail</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Encyclopedia Article</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Film or Broadcast</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Forum Post</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Government Document</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Grant</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Hearing</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Instant Message</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Interview</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Legal Rule or Regulation</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Letter</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Magazine Article</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Manuscript</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Map</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Newspaper Article</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Patent</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Podcast</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Preprint</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Presentation</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Social Media</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Standard</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Statute</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Television Episode</span>
-                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Video Recording</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Journal Article</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book Section</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Conference Paper</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Web Page</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Report</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Thesis</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Generic</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Artwork</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Audio Recording</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Bill</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Blog Post</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Case</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Computer Program</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dataset</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dictionary Entry</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Document</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">E-mail</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Encyclopedia Article</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Film or Broadcast</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Forum Post</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Government Document</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Grant</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Hearing</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Instant Message</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Interview</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Legal Rule or Regulation</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Letter</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Magazine Article</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Manuscript</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Map</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Newspaper Article</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Patent</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Podcast</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Preprint</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Presentation</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Social Media</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Standard</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Statute</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Television Episode</span>
+                                    <span class="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Video Recording</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Feature 2: Filters & Export -->
+                    <!-- Feature 2: Live Citation Panel -->
                     <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
                         <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
-                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">2. Advanced Filtering & Multi-Format Export</h3>
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">2. Live Citation & Metadata Panel</h3>
+                                <p class="text-gray-600 dark:text-gray-400 mb-4">View your metadata instantly and generate publication-ready citations on the fly. Select from standard academic formats directly in the interface.</p>
+                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5 mb-4">
+                                    <li>• <strong>Standard Styles:</strong> Support for APA, MLA, Chicago, Harvard, and Vancouver.</li>
+                                    <li>• <strong>Instant Preview:</strong> See your formatted citation immediately before exporting or inserting into Word.</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col p-4 shadow-sm relative overflow-hidden min-h-[300px]">
+                                <div class="mb-3 border-b border-gray-200 dark:border-slate-700 pb-3">
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Smith, J. (2024)</h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">Journal of Future Tech • Vol 12, Issue 4</p>
+                                </div>
+                                
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <button id="cite-btn-APA" onclick="window.updateCitationFormat('APA')" class="citation-btn bg-primary text-white border border-primary text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">APA</button>
+                                    <button id="cite-btn-MLA" onclick="window.updateCitationFormat('MLA')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">MLA</button>
+                                    <button id="cite-btn-Chicago" onclick="window.updateCitationFormat('Chicago')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">Chicago</button>
+                                    <button id="cite-btn-Harvard" onclick="window.updateCitationFormat('Harvard')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">Harvard</button>
+                                    <button id="cite-btn-Vancouver" onclick="window.updateCitationFormat('Vancouver')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">Vancouver</button>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700 p-4 flex-1">
+                                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Generated Citation</span>
+                                    <p id="citation-output" class="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-serif">
+                                        <!-- Citation output populated by JS -->
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Filters & Export -->
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
+                        <!-- Text Block (Always Left) -->
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">3. Advanced Filtering & Multi-Format Export</h3>
                                 <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
                                     <li>• <strong>Filter by:</strong> Custom Theme, Type of Reference, or use the global searching box.</li>
                                     <li>• <strong>Visual Searching:</strong> Toggle Keyword Highlight matching in search results.</li>
@@ -599,10 +722,15 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                 <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center shrink-0">
                                     <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
                                         <span class="text-gray-400 text-xs mr-2 shrink-0">🔍</span>
-                                        <span class="text-xs text-gray-500 font-medium font-mono whitespace-nowrap overflow-hidden text-ellipsis">Governance</span>
+                                        <input type="text" id="matrix-search" placeholder="Literature" class="bg-transparent border-none outline-none text-xs text-gray-700 dark:text-gray-200 w-full font-mono placeholder-gray-400">
                                     </div>
                                     <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Themes ▾</div>
-                                    <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Types ▾</div>
+                                    <select id="matrix-type-filter" class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1.5 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0 outline-none cursor-pointer">
+                                        <option value="all">All Types</option>
+                                        <option value="journal">Journal Article</option>
+                                        <option value="book">Book</option>
+                                        <option value="chapter">Book Chapter</option>
+                                    </select>
                                 </div>
                                 <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-sm overflow-hidden flex flex-col">
                                     <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700 shrink-0">
@@ -610,29 +738,29 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                         <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">YEAR</div>
                                         <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2] truncate">TITLE</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0">
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="journal">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Smith, J.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2024</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Literature Review on AI</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="journal">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Doe, A.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2023</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Machine Learning Trends</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="book">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Jhon, R.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
-                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Literature Review on AI</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Foundations of AI Governance</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="chapter">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Willian, H.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
-                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">New literature on <span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Governance</span> in Healthcare</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Governance in Healthcare</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="journal">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Kimaun, C.</div>
-                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2026</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Literature Matrix: How new methods are shaping the field</div>
                                     </div>
                                 </div>
@@ -640,12 +768,12 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                         </div>
                     </div>
 
-                    <!-- Feature 3: Mindmap Visualization -->
+                    <!-- Feature 4: Mindmap Visualization -->
                     <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
                         <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
-                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">3. Interactive Mindmap</h3>
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">4. Interactive Mindmap</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Visualize literature connections instantly with 5 dynamic chart layouts: Hierarchical map, Tree (horizontal/vertical), Spider Web, and SunBurst.</p>
                                 <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5 mb-4">
                                     <li>• <strong>Sort Nodes by:</strong> Theme, Author, Year, or Methodology.</li>
@@ -661,8 +789,11 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                 <div class="bg-slate-50 dark:bg-slate-800 p-2 flex gap-2 border-b border-gray-200 dark:border-slate-700 z-10 shrink-0">
                                     <span class="text-[10px] font-bold text-slate-500 flex items-center">Layout:</span>
                                     <select id="demo-mindmap-type" onchange="window.updateMindmapDemo()" class="text-xs bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-slate-700 dark:text-slate-200 outline-none cursor-pointer">
-                                        <option value="orthogonal">Tree (Horizontal)</option>
-                                        <option value="radial">Spider Web</option>
+                                        <option value="orthogonal">Hierarchical Map (Org Chart)</option>
+                                        <option value="orthogonal" selected>Tree (Horizontal)</option>
+                                        <option value="tree_vert">Tree (Vertical)</option>
+                                        <option value="radial">Spider Web (Circular)</option>
+                                        <option value="sunburst">Sunburst (Bubble Map)</option>
                                     </select>
                                 </div>
                                 <!-- Canvas Container -->
@@ -671,17 +802,19 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                         </div>
                     </div>
 
-                    <!-- Feature 4: Analytics -->
+                    <!-- Feature 5: Analytics -->
                     <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
                         <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
-                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">4. Data Analytics</h3>
+                                <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">5. Data Analytics</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Uncover patterns in your literature database with distinct analytical views:</p>
                                 <ul class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
                                     <li>📊 Publication Trends</li>
                                     <li>📊 Methodological Distribution</li>
                                     <li>📊 Top Authors</li>
+                                    <li>📊 Journal Impact (Q-Rank)</li>
+                                    <li>📊 Synthesis Table (List View)</li>
                                 </ul>
                                 <p class="text-xs text-slate-500 font-medium">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
                             </div>
@@ -691,11 +824,13 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                             <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden min-h-[300px]">
                                 <!-- Interactive Control Header -->
                                 <div class="bg-slate-50 dark:bg-slate-800 p-2 flex gap-2 border-b border-gray-200 dark:border-slate-700 z-10 shrink-0">
-                                    <span class="text-[10px] font-bold text-slate-500 flex items-center">Chart Style:</span>
+                                    <span class="text-[10px] font-bold text-slate-500 flex items-center">View Mode:</span>
                                     <select id="demo-analytics-type" onchange="window.updateAnalyticsDemo()" class="text-xs bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-slate-700 dark:text-slate-200 outline-none cursor-pointer">
-                                        <option value="bar">Bar Chart</option>
-                                        <option value="line">Line Chart</option>
-                                        <option value="pie">Pie Chart</option>
+                                        <option value="trends">1. Publication Trends</option>
+                                        <option value="methods">2. Methodological Distribution</option>
+                                        <option value="impact">3. Journal Impact Rank</option>
+                                        <option value="authors">4. Top Authors</option>
+                                        <option value="synthesis">5. Synthesis Table (List View)</option>
                                     </select>
                                 </div>
                                 <!-- Canvas Container -->
@@ -704,48 +839,7 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                         </div>
                     </div>
 
-                    <!-- Feature 5: Main App Shortcuts (Center Block) -->
-                    <div id="app-shortcuts" class="mb-16 scroll-mt-24">
-                        <div class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto">
-                            <h3 class="text-2xl font-bold mb-2 text-center text-white">Main Application Shortcuts</h3>
-                            <p class="text-slate-400 text-center text-sm mb-6">Work faster with these global hotkeys in the Literature Matrix UI.</p>
-                            <div class="grid sm:grid-cols-2 gap-4">
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                    <span class="text-sm text-slate-300">Add Literature</span>
-                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + L</code>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                    <span class="text-sm text-slate-300">Edit Literature</span>
-                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + E</code>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                    <span class="text-sm text-slate-300">Copy Citation <span class="text-[10px] text-slate-500">(multi-select)</span></span>
-                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + C</code>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                    <span class="text-sm text-slate-300">Export Literature <span class="text-[10px] text-slate-500">(multi-select)</span></span>
-                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + S</code>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                    <span class="text-sm text-slate-300">Export Entire Matrix to Excel</span>
-                                    <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + X</code>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                    <span class="text-sm text-slate-300">Delete Row <span class="text-[10px] text-slate-500">(multi-select)</span></span>
-                                    <code class="font-mono text-red-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Del</code>
-                                </div>
-                                <div class="flex justify-between items-center border-b border-slate-700 pb-2 sm:col-span-2">
-                                    <span class="text-sm text-slate-300">Open Visualizers</span>
-                                    <div class="flex gap-2">
-                                        <code class="font-mono text-emerald-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + M (Mindmap)</code>
-                                        <code class="font-mono text-purple-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Ctrl + T (Analytics)</code>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                     <!-- Feature 6: Internal Browser -->
+                    <!-- Feature 6: Internal Browser -->
                     <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
                         <div class="w-full lg:w-1/2">
@@ -767,7 +861,6 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                     <div class="bg-white dark:bg-slate-700 h-6 flex-1 rounded text-[10px] text-gray-500 flex items-center px-2 font-mono overflow-hidden whitespace-nowrap text-ellipsis">scholar.google.com</div>
                                     <!-- Toggles -->
                                     <div class="flex gap-2 shrink-0">
-                                        <!-- ADDED: Q-RANK Toggle and Badges back as requested -->
                                         <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">Q-RANK</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
                                         <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">SCI-HUB</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
                                     </div>
@@ -818,11 +911,11 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                         <!-- Visual Block (Always Right) -->
                         <div class="w-full lg:w-1/2">
                             <div class="grid grid-cols-2 gap-4 h-full min-h-[300px]">
-                                <div class="bg-slate-100 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center p-4 shadow-sm">
+                                <div class="bg-slate-100 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center p-4 shadow-sm cursor-pointer hover:bg-slate-200 transition" onclick="if(document.documentElement.classList.contains('dark')) toggleTheme()">
                                     <span class="text-4xl mb-2 drop-shadow-md">☀️</span>
                                     <p class="text-slate-700 font-bold text-sm">Light Theme</p>
                                 </div>
-                                <div class="bg-[#1e293b] rounded-xl border border-slate-700 h-full flex flex-col items-center justify-center p-4 shadow-sm">
+                                <div class="bg-[#1e293b] rounded-xl border border-slate-700 h-full flex flex-col items-center justify-center p-4 shadow-sm cursor-pointer hover:bg-slate-800 transition" onclick="if(!document.documentElement.classList.contains('dark')) toggleTheme()">
                                     <span class="text-4xl mb-2 drop-shadow-md">🌙</span>
                                     <p class="text-slate-200 font-bold text-sm">Dark Theme</p>
                                 </div>
@@ -831,7 +924,7 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                     </div>
 
                     <!-- Feature 8: AI Prompts -->
-                    <div class="flex flex-col lg:flex-row gap-8 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 items-stretch mb-16">
                         <!-- Text Block (Always Left) -->
                         <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center relative overflow-hidden">
@@ -856,12 +949,53 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                     <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-4/6"></div>
                                 </div>
                                 <div class="flex flex-col gap-3 w-full max-w-xs">
-                                    <button id="btn-copy-single" onclick="window.copyAIPrompt('single')" class="bg-gray-800 dark:bg-primary text-white text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-700 dark:hover:bg-blue-600 transition shadow-sm font-semibold">
+                                    <button id="btn-copy-single" onclick="window.copyAIPrompt('single')" class="bg-primary text-white text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-600 transition shadow-sm font-semibold border-none">
                                         <span>📋</span> Copy Single Prompt
                                     </button>
-                                    <button id="btn-copy-batch" onclick="window.copyAIPrompt('batch')" class="bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-gray-200 text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-slate-600 transition shadow-sm font-semibold">
+                                    <button id="btn-copy-batch" onclick="window.copyAIPrompt('batch')" class="bg-slate-700 text-white text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-slate-600 transition shadow-sm font-semibold border-none">
                                         <span>📚</span> Copy Batch Prompt
                                     </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feature 9: Main App Shortcuts (Moved here) -->
+                    <div id="app-shortcuts" class="mb-16 scroll-mt-24">
+                        <div class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 border border-gray-200 dark:border-slate-700 shadow-sm max-w-4xl mx-auto transition-colors duration-300">
+                            <h3 class="text-2xl font-bold mb-2 text-center text-slate-900 dark:text-white">9. Main Application Shortcuts</h3>
+                            <p class="text-gray-500 dark:text-slate-400 text-center text-sm mb-6">Work faster with these global hotkeys in the Literature Matrix UI.</p>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Add Literature</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Ctrl + L</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Edit Literature</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Ctrl + E</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Copy Citation <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Ctrl + C</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Export Literature <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Ctrl + S</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Export Entire Matrix to Excel</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Ctrl + X</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Delete Row <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
+                                    <code class="font-mono text-red-500 dark:text-red-400 font-bold whitespace-nowrap">Del</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Open Visualizers</span>
+                                    <div class="flex gap-2">
+                                        <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold whitespace-nowrap">Ctrl + M (Mindmap)</code>
+                                        <code class="font-mono text-purple-600 dark:text-purple-400 font-bold whitespace-nowrap">Ctrl + T (Analytics)</code>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -988,67 +1122,31 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                         </div>
                     </div>
 
-                    <div id="addin-shortcuts" class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto scroll-mt-24">
-                        <h3 class="text-2xl font-bold mb-2 text-center text-white">Word Add-in Shortcuts at a Glance</h3>
-                        <p class="text-slate-400 text-center text-sm mb-6">Work faster with these hotkeys while using the Word Add-in.</p>
+                    <div id="addin-shortcuts" class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 border border-gray-200 dark:border-slate-700 scroll-mt-24 shadow-sm">
+                        <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white">10. Word Add-in Shortcuts at a Glance</h3>
                         <div class="grid sm:grid-cols-2 gap-4">
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                <span class="text-sm text-slate-300">Switch App/Word</span>
-                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + A</code>
+                            <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300">Switch App/Word</span>
+                                <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + A</code>
                             </div>
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                <span class="text-sm text-slate-300">Format: Author (year)</span>
-                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + Z</code>
-                            </div>                           
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                <span class="text-sm text-slate-300">Jump to Ribbon</span>
-                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + S</code>
+                            <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300">Quick Cite</span>
+                                <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + C</code>
                             </div>
-                             <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                <span class="text-sm text-slate-300">Format: (Author, year)</span>
-                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + X</code>
+                            <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300">Jump to Ribbon</span>
+                                <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + S</code>
                             </div>
-                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-                                <span class="text-sm text-slate-300">Quick Cite</span>
-                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + C</code>
+                             <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300">Format: Author (year)</span>
+                                <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + Z</code>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2">
+                                <span class="text-sm text-gray-700 dark:text-slate-300">Format: (Author, year)</span>
+                                <code class="font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + X</code>
                             </div>
                         </div>
                     </div>
-                    <!-- <div id="addin-shortcuts" class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 border border-gray-200 dark:border-slate-700 scroll-mt-24 shadow-sm">
-                        <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white">9. Word Add-in Shortcuts at a Glance</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-gray-700 dark:text-slate-300">
-                                <thead class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-100 uppercase text-xs font-semibold">
-                                    <tr>
-                                        <th class="px-6 py-4 rounded-l-lg">Shortcut Key</th>
-                                        <th class="px-6 py-4 rounded-r-lg">Action Description</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-                                    <tr>
-                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + A</td>
-                                        <td class="px-6 py-4">Switch between Literature Matrix app and Word, auto-selecting current library.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + C</td>
-                                        <td class="px-6 py-4">Open Quick Cite search form directly at current cursor location.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + S</td>
-                                        <td class="px-6 py-4">Jump focus directly to the Literature Matrix Ribbon tab in Word.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + Z</td>
-                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-900 dark:text-slate-100 font-sans">Author (year)</code>.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + X</td>
-                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-900 dark:text-slate-100 font-sans">(Author, year)</code>.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div> -->
                 </div>
             </section>
         </div>
@@ -1110,7 +1208,6 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
         <button onclick="openPaymentModal('Lifetime', '$135')" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
     </div>
 </div>
-                
             </div>
         </div>
 
@@ -1338,7 +1435,8 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                     <span class="text-primary dark:text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
             </div>
-<!-- ABA View -->
+
+            <!-- ABA View -->
             <div id="payment-aba" class="hidden p-6 space-y-6 flex-col items-center text-center overflow-y-auto">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Scan this QR code using your ABA Mobile app to complete the payment for <strong class="text-slate-900 dark:text-white" id="aba-amount"></strong>.</p>
                 <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-200 inline-block">
