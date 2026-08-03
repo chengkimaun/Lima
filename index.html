@@ -104,7 +104,7 @@
                 window.mindmapPreview = echarts.init(mindmapDom);
                 
                 const mindmapData = {
-                    name: 'Literature Matrix',
+                    name: 'Chapter 1', // Updated to Chapter 1 as requested
                     itemStyle: { color: '#1e293b', borderColor: '#1e293b' },
                     label: { color: '#fff' },
                     children: [
@@ -146,7 +146,7 @@
                         textStyle: { color: '#1e293b' },
                         extraCssText: 'box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 6px;',
                         formatter: function (params) {
-                            if(params.data.name === 'Literature Matrix') return '<b>Master Database</b>';
+                            if(params.data.name === 'Chapter 1') return '<b>Master Database</b>';
                             if(params.data.value) return ''; // Don't show tooltip for leaf nodes
                             
                             // Mock data for parent nodes
@@ -265,14 +265,52 @@
             }
         };
 
+        // --- STREAMING_CHUNK:Adding Payment Modal Logic... ---
         // Payment Modal Logic
-        function openPaymentModal() {
+        let selectedPlan = '';
+        let selectedPrice = '';
+
+        window.openPaymentModal = function(planName, priceStr) {
+            selectedPlan = planName;
+            selectedPrice = priceStr;
+            document.getElementById('modal-title').innerText = `Select Payment Method for ${planName}`;
+            
+            // Update the amounts displayed in the individual views
+            document.getElementById('aba-amount').innerText = priceStr;
+            document.getElementById('paypal-amount').innerText = priceStr;
+            document.getElementById('cc-amount').innerText = priceStr;
+            document.getElementById('btc-amount').innerText = priceStr;
+
             document.getElementById('payment-modal').classList.remove('hidden');
-        }
-        
-        function closePaymentModal() {
+            showPaymentSelection();
+        };
+
+        window.closePaymentModal = function() {
             document.getElementById('payment-modal').classList.add('hidden');
-        }
+        };
+
+        window.showPaymentSelection = function() {
+            document.getElementById('payment-selection').classList.remove('hidden');
+            document.getElementById('payment-aba').classList.add('hidden');
+            document.getElementById('payment-paypal').classList.add('hidden');
+            document.getElementById('payment-cc').classList.add('hidden');
+            document.getElementById('payment-btc').classList.add('hidden');
+        };
+
+        window.showPaymentMethod = function(methodId) {
+            document.getElementById('payment-selection').classList.add('hidden');
+            document.getElementById(`payment-${methodId}`).classList.remove('hidden');
+        };
+
+        window.sendEmailNotification = function(paymentMethodName) {
+            const email = "Kimaun78@gmail.com";
+            const subject = encodeURIComponent(`Subscription Request: ${selectedPlan} (${selectedPrice}) via ${paymentMethodName}`);
+            const body = encodeURIComponent(`Hello,\n\nI would like to subscribe to the ${selectedPlan} plan (${selectedPrice}) using ${paymentMethodName}.\n\nPlease find my payment details or receipt attached.\n\nThank you.`);
+            
+            // Trigger the mailto link
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            closePaymentModal();
+        };
     </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -289,28 +327,27 @@
                 Literature Matrix
             </a>
             
-            <!-- Global Theme Toggle & Mobile Menu -->
-            <div class="flex items-center gap-4">
-                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none" aria-label="Toggle Dark Mode">
-                    <span id="theme-icon" class="text-xl">🌙</span>
+            <!-- Mobile Controls -->
+            <div class="flex items-center gap-4 lg:hidden">
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none" aria-label="Toggle Dark Mode">
+                    <span id="theme-icon-mobile" class="text-xl">🌙</span>
                 </button>
-                <div class="lg:hidden">
-                    <button onclick="toggleMobileMenu()" class="p-2 text-gray-600 dark:text-gray-300 focus:outline-none">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    </button>
-                </div>
+                <button onclick="toggleMobileMenu()" class="p-2 text-gray-600 dark:text-gray-300 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
             </div>
 
             <!-- Desktop Menu -->
-            <div class="hidden lg:flex items-center space-x-6 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base absolute left-1/2 transform -translate-x-1/2">
+            <div class="hidden lg:flex items-center space-x-6 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base">
                 <button onclick="switchPage('page-home')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Home</button>
                 <button onclick="switchPage('page-home', 'word-addin')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</button>
                 <button onclick="switchPage('page-pricing')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</button>
                 <button onclick="switchPage('page-tutorials')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Tutorials</button>
-            </div>
-            
-            <div class="hidden lg:block">
-                 <button onclick="switchPage('page-download')" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm shrink-0">Download</button>
+                
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition shrink-0 ml-2" aria-label="Toggle Dark Mode">
+                    <span id="theme-icon" class="text-xl">🌙</span>
+                </button>
+                <button onclick="switchPage('page-download')" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm shrink-0 ml-2">Download</button>
             </div>
             
             <!-- Mobile Menu Dropdown -->
@@ -595,19 +632,31 @@
                                 </div>
                                 <!-- Browser Body -->
                                 <div class="flex-1 p-5 bg-white dark:bg-slate-900 flex flex-col gap-4 relative overflow-y-auto">
-                                    <div class="border-b border-gray-100 dark:border-slate-800 pb-3">
-                                        <div class="h-4 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded mb-1"></div>
-                                        <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
-                                        <div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
-                                    </div>
-                                    <div class="border-b border-gray-100 dark:border-slate-800 pb-3 opacity-80">
-                                        <div class="h-4 w-3/4 bg-blue-100 dark:bg-blue-900/30 rounded mb-1"></div>
-                                        <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
-                                    </div>
-                                    <div class="opacity-60">
-                                        <div class="h-4 w-1/2 bg-blue-100 dark:bg-blue-900/30 rounded mb-1"></div>
-                                        <div class="h-2 w-4/5 bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
-                                    </div>
+                                    <!-- Q1 Result -->
+									<div class="border-b border-gray-100 dark:border-slate-800 pb-3">
+										<div class="flex items-center gap-2 mb-1">
+											<div class="h-4 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+											<span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q1</span>
+										</div>
+										<div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+										<div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
+									</div>
+									<!-- Q2 Result -->
+									<div class="border-b border-gray-100 dark:border-slate-800 pb-3 opacity-80">
+										<div class="flex items-center gap-2 mb-1">
+											<div class="h-4 w-3/4 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+											<span class="bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q2</span>
+										</div>
+										<div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+									</div>
+									<!-- Q3/Q4 Results -->
+									<div class="opacity-60">
+										<div class="flex items-center gap-2 mb-1">
+											<div class="h-4 w-1/2 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+											<span class="bg-yellow-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q3</span>
+										</div>
+										<div class="h-2 w-4/5 bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+									</div>
                                     <div class="absolute bottom-4 left-4 bg-orange-100 text-orange-800 border border-orange-200 text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1 shadow-sm"><span>🔓</span> Open via Sci-Hub</div>
                                 </div>
                             </div>
@@ -817,14 +866,14 @@
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$15</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal()" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+                        <button onclick="openPaymentModal('1 Month', '$15')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
                     </div>
                     <!-- 3 Months -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">3 Months</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$35</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal()" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+                        <button onclick="openPaymentModal('3 Months', '$35')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
                     </div>
                     <!-- 6 Months -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
@@ -832,22 +881,22 @@
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$70</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal()" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
+                        <button onclick="openPaymentModal('6 Months', '$70')" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
                     </div>
                     <!-- 1 Year -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Year</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$140</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal()" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+                        <button onclick="openPaymentModal('1 Year', '$140')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
                     </div>
                     <!-- Lifetime -->
-                    <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition mb-0 pb-6 lg:mb-4 lg:pb-10">
+                    <div class="col-span-1 md:col-span-2 lg:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition mb-0 pb-6 lg:mb-4 lg:pb-10">
                         <div class="text-yellow-400 text-2xl mb-2">👑</div>
                         <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
                         <div class="text-3xl font-extrabold text-white mb-4">$299</div>
                         <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
-                        <button onclick="openPaymentModal()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
+                        <button onclick="openPaymentModal('Lifetime', '$299')" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
                     </div>
                 </div>
             </div>
@@ -989,17 +1038,19 @@
 
     <!-- Payment Modal -->
     <div id="payment-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4">
-        <div class="bg-white dark:bg-darkbg w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700">
-            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
-                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Select Payment Method</h3>
+        <div class="bg-white dark:bg-darkbg w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700 flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800 shrink-0">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white" id="modal-title">Select Payment Method</h3>
                 <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="p-6 space-y-4">
-                
-                <!-- ABA Pay -->
-                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+            
+            <!-- Selection View -->
+            <div id="payment-selection" class="p-6 space-y-4 overflow-y-auto">
+                <!-- ABA -->
+                <button onclick="showPaymentMethod('aba')" class="w-full text-left border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-[#005f73] rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">ABA</div>
                         <div>
@@ -1007,16 +1058,11 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">Scan to pay directly from your ABA app</div>
                         </div>
                     </div>
-                    <button class="text-sm font-semibold text-primary dark:text-blue-400 group-hover:underline">Show QR</button>
-                </div>
+                    <span class="text-primary dark:text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
+                </button>
                 
-                <!-- QR Image (Hidden by default, shown via JS if implemented) -->
-                <div class="hidden justify-center py-4">
-                    <img src="image_838a39.jpg" alt="ABA QR Code" class="max-w-[200px] border rounded shadow-md">
-                </div>
-
                 <!-- PayPal -->
-                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                <button onclick="showPaymentMethod('paypal')" class="w-full text-left border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-[#003087] rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">PayPal</div>
                         <div>
@@ -1024,10 +1070,11 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">Pay securely with your PayPal account</div>
                         </div>
                     </div>
-                </div>
+                    <span class="text-primary dark:text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
+                </button>
 
                 <!-- Visa/Mastercard -->
-                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                <button onclick="showPaymentMethod('cc')" class="w-full text-left border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-slate-800 dark:text-white font-bold text-xs shadow-sm">VISA</div>
                         <div>
@@ -1035,10 +1082,11 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">Visa, Mastercard, etc.</div>
                         </div>
                     </div>
-                </div>
+                    <span class="text-primary dark:text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
+                </button>
                 
                 <!-- Bitcoin -->
-                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                <button onclick="showPaymentMethod('btc')" class="w-full text-left border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition group">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-[#f7931a] rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">BTC</div>
                         <div>
@@ -1046,8 +1094,64 @@
                             <div class="text-xs text-gray-500 dark:text-gray-400">Pay using Cryptocurrency</div>
                         </div>
                     </div>
-                </div>
+                    <span class="text-primary dark:text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
+                </button>
+            </div>
 
+            <!-- ABA View -->
+            <div id="payment-aba" class="hidden p-6 space-y-6 flex-col items-center text-center overflow-y-auto">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Scan this QR code using your ABA Mobile app to complete the payment for <strong class="text-slate-900 dark:text-white" id="aba-amount"></strong>.</p>
+                <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-200 inline-block">
+                    <img src="image_838a39.jpg" alt="ABA QR Code" class="w-48 h-auto mx-auto rounded-lg">
+                </div>
+                <button onclick="sendEmailNotification('ABA KHQR')" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">I have paid, send receipt</button>
+                <button onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline">← Back to methods</button>
+            </div>
+
+            <!-- PayPal View -->
+            <div id="payment-paypal" class="hidden p-6 space-y-6 overflow-y-auto">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Enter your PayPal email address to receive an invoice for <strong class="text-slate-900 dark:text-white" id="paypal-amount"></strong>.</p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">PayPal Email</label>
+                    <input type="email" placeholder="you@example.com" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <button onclick="sendEmailNotification('PayPal')" class="w-full bg-[#003087] text-white py-3 rounded-lg font-bold hover:bg-[#001f5c] transition">Proceed with PayPal</button>
+                <button onclick="showPaymentSelection()" class="w-full text-center text-sm text-gray-500 hover:underline">← Back to methods</button>
+            </div>
+
+            <!-- CC View -->
+            <div id="payment-cc" class="hidden p-6 space-y-4 overflow-y-auto">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Secure credit card payment for <strong class="text-slate-900 dark:text-white" id="cc-amount"></strong>.</p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">Cardholder Name</label>
+                    <input type="text" placeholder="John Doe" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">Card Number</label>
+                    <input type="text" placeholder="0000 0000 0000 0000" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">Expiry Date</label>
+                        <input type="text" placeholder="MM/YY" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">CVC</label>
+                        <input type="text" placeholder="123" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                </div>
+                <button onclick="sendEmailNotification('Credit Card')" class="w-full bg-primary text-white py-3 mt-2 rounded-lg font-bold hover:bg-blue-700 transition">Pay Now</button>
+                <button onclick="showPaymentSelection()" class="w-full text-center text-sm text-gray-500 hover:underline">← Back to methods</button>
+            </div>
+
+            <!-- BTC View -->
+            <div id="payment-btc" class="hidden p-6 space-y-6 flex-col items-center text-center overflow-y-auto">
+                <p class="text-sm text-gray-600 dark:text-gray-400">Send exactly <strong class="text-slate-900 dark:text-white" id="btc-amount"></strong> worth of BTC to the address below.</p>
+                <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700 break-all text-xs font-mono text-slate-700 dark:text-gray-300 select-all">
+                    bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+                </div>
+                <button onclick="sendEmailNotification('Bitcoin')" class="w-full bg-[#f7931a] text-white py-3 rounded-lg font-bold hover:bg-[#e08516] transition">I have transferred the funds</button>
+                <button onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline">← Back to methods</button>
             </div>
         </div>
     </div>
