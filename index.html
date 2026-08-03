@@ -96,7 +96,7 @@
             initLivePreviews();
         });
 
-        // --- Live Preview Initializers & Interaction Logic ---
+         // --- Live Preview Initializers & Interaction Logic ---
         function initLivePreviews() {
             // 1. Mindmap Preview
             const mindmapDom = document.getElementById('mindmap-preview-container');
@@ -106,7 +106,14 @@
                 const mindmapData = {
                     name: 'Chapter 1', // FIX: Root node text updated
                     itemStyle: { color: '#1e293b', borderColor: '#1e293b' },
-                    label: { color: '#fff' },
+                    // FIX: Removed background and border formatting to make it clean text
+                    label: { 
+                        color: '#1e293b', 
+                        backgroundColor: 'transparent',
+                        borderColor: 'transparent',
+                        borderWidth: 0,
+                        shadowBlur: 0
+                    },
                     children: [
                         { 
                             name: 'Smith (2024)', 
@@ -504,7 +511,7 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
             <section id="features" class="py-16 bg-white dark:bg-darkbg border-t border-gray-100 dark:border-slate-800 transition-colors duration-300 scroll-mt-12">
                 <div class="container mx-auto px-6">
                     <div class="text-center max-w-2xl mx-auto mb-16">
-                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Chapter 1 — Main App Overview</h2>
+                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Overview: Literature Matrix</h2>
                         <p class="text-gray-600 dark:text-gray-400">A powerful central database and built-in browser engine to collect, analyze, and visualize research papers effortlessly.</p>
                     </div>
 
@@ -592,7 +599,7 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                 <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center shrink-0">
                                     <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
                                         <span class="text-gray-400 text-xs mr-2 shrink-0">🔍</span>
-                                        <span class="text-xs text-gray-500 font-medium font-mono whitespace-nowrap overflow-hidden text-ellipsis">Ctrl+F Search...</span>
+                                        <span class="text-xs text-gray-500 font-medium font-mono whitespace-nowrap overflow-hidden text-ellipsis">Governance</span>
                                     </div>
                                     <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Themes ▾</div>
                                     <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Types ▾</div>
@@ -606,18 +613,27 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                                     <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Smith, J.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2024</div>
-                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate"><span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Literature</span> Review on AI</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Literature Review on AI</div>
                                     </div>
-                                    <!-- Added extra rows for better visual density -->
                                     <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Doe, A.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2023</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Machine Learning Trends</div>
                                     </div>
                                     <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
-                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Wang, L.</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Jhon, R.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
-                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Automation in Healthcare</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Literature Review on AI</div>
+                                    </div>
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Willian, H.</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">New literature on <span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Governance</span> in Healthcare</div>
+                                    </div>
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0">
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Kimaun, C.</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate">Literature Matrix: How new methods are shaping the field</div>
                                     </div>
                                 </div>
                             </div>
@@ -691,7 +707,7 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                     <!-- Feature 5: Main App Shortcuts (Center Block) -->
                     <div id="app-shortcuts" class="mb-16 scroll-mt-24">
                         <div class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto">
-                            <h3 class="text-2xl font-bold mb-2 text-center text-white">5. Main Application Shortcuts</h3>
+                            <h3 class="text-2xl font-bold mb-2 text-center text-white">Main Application Shortcuts</h3>
                             <p class="text-slate-400 text-center text-sm mb-6">Work faster with these global hotkeys in the Literature Matrix UI.</p>
                             <div class="grid sm:grid-cols-2 gap-4">
                                 <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -855,128 +871,184 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
             </section>
 
             <!-- WORD'S ADD-IN SECTION -->
-            <section id="word-addin" class="py-20 bg-slate-900 text-white scroll-mt-12">
+            <section id="word-addin" class="py-20 bg-slate-50 dark:bg-darkcard text-slate-900 dark:text-white scroll-mt-12 transition-colors duration-300">
                 <div class="container mx-auto px-6">
                     <div class="text-center max-w-3xl mx-auto mb-16">
-                        <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-900 text-blue-300 uppercase tracking-wider">Seamless Integration</span>
+                        <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">Seamless Integration</span>
                         <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-4">Literature Matrix: Word Add-in Guide</h2>
-                        <p class="text-slate-400">Everything you need to write, cite, and format directly within Microsoft Word.</p>
+                        <p class="text-gray-600 dark:text-gray-400">Everything you need to write, cite, and format directly within Microsoft Word.</p>
                     </div>
 
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0">1</div>
-                            <h3 class="text-xl font-bold mb-3">Getting Started</h3>
-                            <ul class="text-slate-300 text-sm space-y-2 flex-grow">
-                                <li><strong class="text-white">Open Literature Matrix:</strong> Launches main application to manage master database.</li>
-                                <li><strong class="text-white">Help:</strong> Opens this user guide.</li>
+                        <!-- 1. Getting Started -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Getting Started</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
+                                <li><strong class="text-slate-900 dark:text-white">Open Literature Matrix:</strong> Launches main application to manage master database.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Help:</strong> Opens this user guide.</li>
                             </ul>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0">2</div>
-                            <h3 class="text-xl font-bold mb-3">Library Setting Group</h3>
-                            <ul class="text-slate-300 text-sm space-y-2 flex-grow">
-                                <li><strong class="text-white">Current Library:</strong> Dropdown to switch active database files.</li>
-                                <li><strong class="text-white">Open/Switch Library:</strong> Manually browse & select database files.</li>
-                                <li><strong class="text-white">Refresh Citation & Bibliography:</strong> Immediate sync + Auto Refresh toggle.</li>
+                        
+                        <!-- 2. Library Setting Group -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Library Setting Group</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
+                                <li><strong class="text-slate-900 dark:text-white">Current Library:</strong> Dropdown to switch active database files.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Open/Switch Library:</strong> Manually browse & select database files.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Refresh Citation & Bibliography:</strong> Immediate sync + Auto Refresh toggle.</li>
                             </ul>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0">3</div>
-                            <h3 class="text-xl font-bold mb-3">Appearance</h3>
-                            <ul class="text-slate-300 text-sm space-y-2 flex-grow">
-                                <li><strong class="text-white">Themes:</strong> Light, Dark, Blue, Emerald, Sunset.</li>
-                                <li><strong class="text-white">Transparent Overlay:</strong> 50%, 75%, 95%, 100%.</li>
-                                <li><strong class="text-white">Box Shape:</strong> Round Box or Card Box.</li>
-                                <li><strong class="text-white">Text Size:</strong> Auto, Small, Medium, Large.</li>
-                                <li><strong class="text-white">Search Options:</strong> Author+Year+Title, All Columns, Custom Match Highlight Colors.</li>
+                        
+                        <!-- 3. Appearance -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Appearance</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
+                                <li><strong class="text-slate-900 dark:text-white">Themes:</strong> Light, Dark, Blue, Emerald, Sunset.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Transparent Overlay:</strong> 50%, 75%, 95%, 100%.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Box Shape:</strong> Round Box or Card Box.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Text Size:</strong> Auto, Small, Medium, Large.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Search Options:</strong> Author+Year+Title, All Columns, Custom Match Highlight Colors.</li>
                             </ul>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0">4</div>
-                            <h3 class="text-xl font-bold mb-3">Space & Indent</h3>
-                            <ul class="text-slate-300 text-sm space-y-2 flex-grow">
-                                <li><strong class="text-white">Paragraph Spacing:</strong> Single, 1.5, Double, At least, Exactly, Multiple.</li>
-                                <li><strong class="text-white">Special Indents:</strong> None, First line, or Hanging indents.</li>
-                                <li><strong class="text-white">By Measurement:</strong> Custom inches (e.g., 0.25" to 1.5").</li>
+                        
+                        <!-- 4. Space & Indent -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Space & Indent</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
+                                <li><strong class="text-slate-900 dark:text-white">Paragraph Spacing:</strong> Single, 1.5, Double, At least, Exactly, Multiple.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Special Indents:</strong> None, First line, or Hanging indents.</li>
+                                <li><strong class="text-slate-900 dark:text-white">By Measurement:</strong> Custom inches (e.g., 0.25" to 1.5").</li>
                             </ul>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0">5</div>
-                            <h3 class="text-xl font-bold mb-3">Font & Style</h3>
-                            <ul class="text-slate-300 text-sm space-y-2 flex-grow">
-                                <li><strong class="text-white">Font & Size:</strong> Custom font face and point sizes for bibliography.</li>
-                                <li><strong class="text-white">Heading Title:</strong> "None", "Bibliography", "References", "Works Cited".</li>
-                                <li><strong class="text-white">List Style:</strong> Bullets, Numeric (1), [1], (1), or custom list formatting.</li>
+                        
+                        <!-- 5. Font & Style -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Font & Style</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
+                                <li><strong class="text-slate-900 dark:text-white">Font & Size:</strong> Custom font face and point sizes for bibliography.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Heading Title:</strong> "None", "Bibliography", "References", "Works Cited".</li>
+                                <li><strong class="text-slate-900 dark:text-white">List Style:</strong> Bullets, Numeric (1), [1], (1), or custom list formatting.</li>
                             </ul>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                            <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0">6</div>
-                            <h3 class="text-xl font-bold mb-3">Citation & Hyperlink</h3>
-                            <ul class="text-slate-300 text-sm space-y-2 flex-grow">
-                                <li><strong class="text-white">Styles:</strong> APA, MLA, Chicago, Harvard, Vancouver.</li>
-                                <li><strong class="text-white">Format:</strong> Author (year) or (Author, year).</li>
-                                <li><strong class="text-white">Hyperlinks:</strong> Active two-way links & back-references.</li>
-                                <li><strong class="text-white">Cite Button:</strong> Quick Search trigger (<code class="bg-slate-900 px-1 py-0.5 rounded text-blue-400">Alt+C</code>).</li>
+                        
+                        <!-- 6. Citation & Hyperlink -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Citation & Hyperlink</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
+                                <li><strong class="text-slate-900 dark:text-white">Styles:</strong> APA, MLA, Chicago, Harvard, Vancouver.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Format:</strong> Author (year) or (Author, year).</li>
+                                <li><strong class="text-slate-900 dark:text-white">Hyperlinks:</strong> Active two-way links & back-references.</li>
+                                <li><strong class="text-slate-900 dark:text-white">Cite Button:</strong> Quick Search trigger (<code class="bg-gray-100 dark:bg-slate-900 px-1 py-0.5 rounded text-primary dark:text-blue-400 border border-gray-200 dark:border-slate-600">Alt+C</code>).</li>
                             </ul>
                         </div>
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-8 mb-16">
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0 text-white">7</div>
-                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">Save As PDF</h3>
-                            <p class="text-slate-300 text-sm leading-relaxed flex-grow">
+                        <!-- 7. Save As PDF -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                             <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">7. Save As PDF</h3>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed flex-grow">
                                 Instantly cleans up Word field shading and exports your document layout cleanly to PDF while preserving bookmarks and active hyperlinked citations.
                             </p>
                         </div>
-                        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col">
-                             <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-lg mb-4 shrink-0 text-white">8</div>
-                            <h3 class="text-xl font-bold mb-3 flex items-center gap-2">Right-Click Context Menu</h3>
-                            <ul class="text-slate-300 text-sm space-y-1.5 flex-grow">
-                                <li>• <strong class="text-white">Edit Format:</strong> Switch between Author (year) & (Author, year).</li>
-                                <li>• <strong class="text-white">Edit Prefix/Suffix:</strong> Add custom text (e.g., "see", "p. 67").</li>
-                                <li>• <strong class="text-white">Edit Reference:</strong> Open master database to edit source details.</li>
-                                <li>• <strong class="text-white">Switch Library & Refresh:</strong> Quickly re-sync references on demand.</li>
+                        
+                        <!-- 8. Right-Click Menu -->
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
+                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">8. Right-Click Context Menu</h3>
+                            <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-1.5 flex-grow">
+                                <li>• <strong class="text-slate-900 dark:text-white">Edit Format:</strong> Switch between Author (year) & (Author, year).</li>
+                                <li>• <strong class="text-slate-900 dark:text-white">Edit Prefix/Suffix:</strong> Add custom text (e.g., "see", "p. 67").</li>
+                                <li>• <strong class="text-slate-900 dark:text-white">Edit Reference:</strong> Open master database to edit source details.</li>
+                                <li>• <strong class="text-slate-900 dark:text-white">Switch Library & Refresh:</strong> Quickly re-sync references on demand.</li>
                             </ul>
                         </div>
                     </div>
 
-                    <div id="addin-shortcuts" class="bg-slate-800/80 rounded-2xl p-8 border border-slate-700 scroll-mt-24">
-                        <h3 class="text-2xl font-bold mb-6 text-center">9. Word Add-in Shortcuts at a Glance</h3>
+                    <div id="addin-shortcuts" class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto scroll-mt-24">
+                        <h3 class="text-2xl font-bold mb-2 text-center text-white">Word Add-in Shortcuts at a Glance</h3>
+                        <p class="text-slate-400 text-center text-sm mb-6">Work faster with these hotkeys while using the Word Add-in.</p>
+                        <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                <span class="text-sm text-slate-300">Switch App/Word</span>
+                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + A</code>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                <span class="text-sm text-slate-300">Format: Author (year)</span>
+                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + Z</code>
+                            </div>                           
+                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                <span class="text-sm text-slate-300">Jump to Ribbon</span>
+                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + S</code>
+                            </div>
+                             <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                <span class="text-sm text-slate-300">Format: (Author, year)</span>
+                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + X</code>
+                            </div>
+                            <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                                <span class="text-sm text-slate-300">Quick Cite</span>
+                                <code class="font-mono text-blue-400 font-bold bg-slate-950 px-2 py-1 rounded text-xs">Alt + C</code>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- <div id="addin-shortcuts" class="bg-white dark:bg-slate-800/80 rounded-2xl p-8 border border-gray-200 dark:border-slate-700 scroll-mt-24 shadow-sm">
+                        <h3 class="text-2xl font-bold mb-6 text-center text-slate-900 dark:text-white">9. Word Add-in Shortcuts at a Glance</h3>
                         <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm text-slate-300">
-                                <thead class="bg-slate-900 text-slate-100 uppercase text-xs font-semibold">
+                            <table class="w-full text-left text-sm text-gray-700 dark:text-slate-300">
+                                <thead class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-100 uppercase text-xs font-semibold">
                                     <tr>
                                         <th class="px-6 py-4 rounded-l-lg">Shortcut Key</th>
                                         <th class="px-6 py-4 rounded-r-lg">Action Description</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-slate-700">
+                                <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                                     <tr>
-                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + A</td>
+                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + A</td>
                                         <td class="px-6 py-4">Switch between Literature Matrix app and Word, auto-selecting current library.</td>
                                     </tr>
                                     <tr>
-                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + C</td>
+                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + C</td>
                                         <td class="px-6 py-4">Open Quick Cite search form directly at current cursor location.</td>
                                     </tr>
                                     <tr>
-                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + S</td>
+                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + S</td>
                                         <td class="px-6 py-4">Jump focus directly to the Literature Matrix Ribbon tab in Word.</td>
                                     </tr>
                                     <tr>
-                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + Z</td>
-                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-100 font-sans">Author (year)</code>.</td>
+                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + Z</td>
+                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-900 dark:text-slate-100 font-sans">Author (year)</code>.</td>
                                     </tr>
                                     <tr>
-                                        <td class="px-6 py-4 font-mono text-blue-400 font-bold whitespace-nowrap">Alt + X</td>
-                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-100 font-sans">(Author, year)</code>.</td>
+                                        <td class="px-6 py-4 font-mono text-primary dark:text-blue-400 font-bold whitespace-nowrap">Alt + X</td>
+                                        <td class="px-6 py-4">Change selected citation format to <code class="text-slate-900 dark:text-slate-100 font-sans">(Author, year)</code>.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </section>
         </div>
@@ -992,45 +1064,53 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                     <p class="text-gray-600 dark:text-gray-400">Choose the plan that best fits your research needs. All plans include full access to the Desktop App and Word Add-in.</p>
                 </div>
 
-                <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
-                    <!-- 1 Month -->
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
-                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$15</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal('1 Month', '$15')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
-                    </div>
-                    <!-- 3 Months -->
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">3 Months</h3>
-                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$35</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal('3 Months', '$35')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
-                    </div>
-                    <!-- 6 Months -->
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
-                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular</div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
-                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$70</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal('6 Months', '$70')" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
-                    </div>
-                    <!-- 1 Year -->
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Year</h3>
-                        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$140</div>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <button onclick="openPaymentModal('1 Year', '$140')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
-                    </div>
-                    <!-- Lifetime -->
-                    <div class="col-span-1 md:col-span-2 lg:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition mb-0 pb-6 lg:mb-4 lg:pb-10">
-                        <div class="text-yellow-400 text-2xl mb-2">👑</div>
-                        <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
-                        <div class="text-3xl font-extrabold text-white mb-4">$299</div>
-                        <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
-                        <button onclick="openPaymentModal('Lifetime', '$299')" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
-                    </div>
-                </div>
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 items-end">
+    <!-- 1 Month -->
+    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
+        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$10</div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+        <button onclick="openPaymentModal('1 Month', '$10')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+    </div>
+    
+    <!-- 3 Months -->
+    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $5</div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">3 Months</h3>
+        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$25</div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+        <button onclick="openPaymentModal('3 Months', '$25')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+    </div>
+    
+    <!-- 6 Months -->
+    <div class="col-span-2 sm:col-span-1 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular • Save $15</div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
+        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$45</div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+        <button onclick="openPaymentModal('6 Months', '$45')" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
+    </div>
+    
+    <!-- 1 Year -->
+    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $35</div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">1 Year</h3>
+        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$85</div>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
+        <button onclick="openPaymentModal('1 Year', '$85')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+    </div>
+    
+    <!-- Lifetime -->
+    <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition relative">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Best Value</div>
+        <div class="text-yellow-400 text-2xl mb-2 mt-2">👑</div>
+        <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
+        <div class="text-3xl font-extrabold text-white mb-4">$135</div>
+        <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
+        <button onclick="openPaymentModal('Lifetime', '$135')" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
+    </div>
+</div>
+                
             </div>
         </div>
 
@@ -1167,7 +1247,7 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
         </div>
 
         <!-- ============================================== -->
-        <!-- NEW VIRTUAL PAGE 5: CONTACT -->
+        <!-- VIRTUAL PAGE 5: CONTACT -->
         <!-- ============================================== -->
         <div id="page-contact" class="page-view hidden min-h-screen pt-16 pb-20 bg-slate-50 dark:bg-darkbg transition-colors duration-300">
             <div class="container mx-auto px-6 max-w-2xl text-center">
@@ -1258,16 +1338,16 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                     <span class="text-primary dark:text-blue-400 group-hover:translate-x-1 transition-transform">→</span>
                 </button>
             </div>
-
-            <!-- ABA View -->
+<!-- ABA View -->
             <div id="payment-aba" class="hidden p-6 space-y-6 flex-col items-center text-center overflow-y-auto">
                 <p class="text-sm text-gray-600 dark:text-gray-400">Scan this QR code using your ABA Mobile app to complete the payment for <strong class="text-slate-900 dark:text-white" id="aba-amount"></strong>.</p>
                 <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-200 inline-block">
                     <img src="image_838a39.jpg" alt="ABA QR Code" class="w-48 h-auto mx-auto rounded-lg">
                 </div>
-                <button onclick="sendEmailNotification('ABA KHQR', 'aba')" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">I have paid, send receipt</button>
-                <p id="aba-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If your email client didn't open automatically, please manually email your receipt to Kimaun78@gmail.com</p>
-                <button onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline">← Back to methods</button>
+                <!-- Changed button type to regular button so it triggers JS, not form submission -->
+                <button type="button" onclick="sendEmailNotification('ABA KHQR', 'aba')" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition">I have paid, send receipt</button>
+                <p id="aba-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If the email can't open automatically, please manually email your receipt to <a href="mailto:Kimaun78@gmail.com" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">Kimaun78@gmail.com</a> or contact via Telegram: <a href="https://t.me/Kimaun" target="_blank" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">t.me/Kimaun</a></p>
+                <button type="button" onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline">← Back to methods</button>
             </div>
 
             <!-- PayPal View -->
@@ -1277,9 +1357,9 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                     <label class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">PayPal Email</label>
                     <input type="email" id="paypal-input-email" placeholder="you@example.com" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                 </div>
-                <button onclick="sendEmailNotification('PayPal', 'paypal')" class="w-full bg-[#003087] text-white py-3 rounded-lg font-bold hover:bg-[#001f5c] transition">Request PayPal Invoice</button>
-                <p id="paypal-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If your email client didn't open automatically, please manually email your PayPal address to Kimaun78@gmail.com</p>
-                <button onclick="showPaymentSelection()" class="w-full text-center text-sm text-gray-500 hover:underline">← Back to methods</button>
+                <button type="button" onclick="sendEmailNotification('PayPal', 'paypal')" class="w-full bg-[#003087] text-white py-3 rounded-lg font-bold hover:bg-[#001f5c] transition">Request PayPal Invoice</button>
+                <p id="paypal-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If the email can't open automatically, please manually email your PayPal address to <a href="mailto:Kimaun78@gmail.com" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">Kimaun78@gmail.com</a> or contact via Telegram: <a href="https://t.me/Kimaun" target="_blank" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">t.me/Kimaun</a></p>
+                <button type="button" onclick="showPaymentSelection()" class="w-full text-center text-sm text-gray-500 hover:underline">← Back to methods</button>
             </div>
 
             <!-- CC View -->
@@ -1303,9 +1383,9 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                         <input type="text" placeholder="123" class="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
                     </div>
                 </div>
-                <button onclick="sendEmailNotification('Credit Card', 'cc')" class="w-full bg-primary text-white py-3 mt-2 rounded-lg font-bold hover:bg-blue-700 transition">Request Payment Link</button>
-                <p id="cc-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If your email client didn't open automatically, please manually email your request to Kimaun78@gmail.com</p>
-                <button onclick="showPaymentSelection()" class="w-full text-center text-sm text-gray-500 hover:underline">← Back to methods</button>
+                <button type="button" onclick="sendEmailNotification('Credit Card', 'cc')" class="w-full bg-primary text-white py-3 mt-2 rounded-lg font-bold hover:bg-blue-700 transition">Request Payment Link</button>
+                <p id="cc-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If the email can't open automatically, please manually email your request to <a href="mailto:Kimaun78@gmail.com" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">Kimaun78@gmail.com</a> or contact via Telegram: <a href="https://t.me/Kimaun" target="_blank" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">t.me/Kimaun</a></p>
+                <button type="button" onclick="showPaymentSelection()" class="w-full text-center text-sm text-gray-500 hover:underline">← Back to methods</button>
             </div>
 
             <!-- BTC View -->
@@ -1314,9 +1394,9 @@ C7  - [Sample & Data Scope (e.g., N=200; 10 interviews; 2 cases)]
                 <div class="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700 break-all text-xs font-mono text-slate-700 dark:text-gray-300 select-all">
                     bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
                 </div>
-                <button onclick="sendEmailNotification('Bitcoin', 'btc')" class="w-full bg-[#f7931a] text-white py-3 rounded-lg font-bold hover:bg-[#e08516] transition">I have transferred the funds</button>
-                <p id="btc-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If your email client didn't open automatically, please manually email your transaction hash to Kimaun78@gmail.com</p>
-                <button onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline">← Back to methods</button>
+                <button type="button" onclick="sendEmailNotification('Bitcoin', 'btc')" class="w-full bg-[#f7931a] text-white py-3 rounded-lg font-bold hover:bg-[#e08516] transition">I have transferred the funds</button>
+                <p id="btc-feedback" class="payment-feedback hidden text-xs text-orange-500 font-medium">If the email can't open automatically, please manually email your transaction hash to <a href="mailto:Kimaun78@gmail.com" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">Kimaun78@gmail.com</a> or contact via Telegram: <a href="https://t.me/Kimaun" target="_blank" class="underline font-semibold text-[#0088cc] dark:text-[#33a8e5]">t.me/Kimaun</a></p>
+                <button type="button" class="text-sm text-gray-500 hover:underline" onclick="showPaymentSelection()">← Back to methods</button>
             </div>
         </div>
     </div>
