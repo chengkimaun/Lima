@@ -96,46 +96,80 @@
             initLivePreviews();
         });
 
-        // --- Live Preview Initializers ---
+        // --- Live Preview Initializers & Interaction Logic ---
         function initLivePreviews() {
             // 1. Mindmap Preview
             const mindmapDom = document.getElementById('mindmap-preview-container');
             if(mindmapDom) {
                 window.mindmapPreview = echarts.init(mindmapDom);
+                
                 const mindmapData = {
                     name: 'Literature Matrix',
+                    itemStyle: { color: '#1e293b', borderColor: '#1e293b' },
+                    label: { color: '#fff' },
                     children: [
-                        { name: 'Smith (2024)', value: 1 },
-                        { name: 'AI Methodology', value: 1 },
-                        { name: 'Clinical Data', value: 1 }
+                        { 
+                            name: 'Smith (2024)', 
+                            itemStyle: { color: '#fac858', borderColor: '#fac858' },
+                            lineStyle: { color: '#fac858', width: 3 },
+                            children: [
+                                { name: 'Method: Qualitative', itemStyle: { color: '#fac858' }, value: 1 },
+                                { name: 'Gap: Small Sample', itemStyle: { color: '#fac858' }, value: 1 }
+                            ]
+                        },
+                        { 
+                            name: 'AI Automation', 
+                            itemStyle: { color: '#5470c6', borderColor: '#5470c6' },
+                            lineStyle: { color: '#5470c6', width: 3 },
+                            children: [
+                                { name: 'Finding: 20% Faster', itemStyle: { color: '#5470c6' }, value: 1 }
+                            ]
+                        },
+                        { 
+                            name: 'Clinical Data', 
+                            itemStyle: { color: '#91cc75', borderColor: '#91cc75' },
+                            lineStyle: { color: '#91cc75', width: 3 },
+                            children: [
+                                { name: 'Source: EHRs', itemStyle: { color: '#91cc75' }, value: 1 }
+                            ]
+                        }
                     ]
                 };
+
                 window.mindmapPreview.setOption({
-                    tooltip: { trigger: 'item', triggerOn: 'mousemove' },
+                    tooltip: { 
+                        trigger: 'item', 
+                        triggerOn: 'mousemove',
+                        formatter: function (params) {
+                            if(params.data.name === 'Literature Matrix') return '<b>Master Database</b>';
+                            return `<b>${params.data.name}</b><br/><i>Click to expand/collapse nodes.</i>`;
+                        }
+                    },
                     series: [{
                         type: 'tree',
                         data: [mindmapData],
                         top: '10%', left: '20%', bottom: '10%', right: '20%',
-                        symbolSize: 10,
+                        symbolSize: 12,
+                        initialTreeDepth: 1, // Start slightly collapsed for interaction
                         label: {
                             position: 'left',
                             verticalAlign: 'middle',
                             align: 'right',
                             fontSize: 12,
-                            backgroundColor: '#1e293b',
-                            color: '#fff',
+                            backgroundColor: '#fff',
+                            color: '#1e293b',
+                            borderColor: '#94a3b8',
+                            borderWidth: 1,
                             padding: [4, 8],
-                            borderRadius: 4
+                            borderRadius: 4,
+                            shadowBlur: 5,
+                            shadowColor: 'rgba(0,0,0,0.1)'
                         },
                         leaves: {
                             label: {
                                 position: 'right',
                                 verticalAlign: 'middle',
-                                align: 'left',
-                                backgroundColor: '#fff',
-                                color: '#1e293b',
-                                borderColor: '#94a3b8',
-                                borderWidth: 1
+                                align: 'left'
                             }
                         },
                         expandAndCollapse: true,
@@ -145,29 +179,70 @@
                 });
             }
 
-            // 2. Analytics Preview (Bar Chart)
+            // 2. Analytics Preview
             const analyticsDom = document.getElementById('analytics-preview-container');
             if(analyticsDom) {
                 window.analyticsPreview = echarts.init(analyticsDom);
-                window.analyticsPreview.setOption({
-                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-                    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
-                    xAxis: { type: 'category', data: ['2020', '2021', '2022', '2023', '2024'], axisLabel: { color: '#64748b' } },
-                    yAxis: { type: 'value', axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0' } } },
-                    series: [{
-                        data: [12, 19, 15, 25, 32],
-                        type: 'bar',
-                        itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] }
-                    }]
-                });
+                window.updateAnalyticsDemo('bar'); // Initialize with bar chart
             }
 
-            // Handle resizing
+            // Handle window resizing
             window.addEventListener('resize', () => {
                 if(window.mindmapPreview) window.mindmapPreview.resize();
                 if(window.analyticsPreview) window.analyticsPreview.resize();
             });
         }
+
+        // --- Interactive Dropdown Functions ---
+        window.updateMindmapDemo = function() {
+            const type = document.getElementById('demo-mindmap-type').value;
+            window.mindmapPreview.setOption({
+                series: [{
+                    layout: type === 'radial' ? 'radial' : 'orthogonal',
+                    orient: type === 'radial' ? undefined : 'LR',
+                    left: type === 'radial' ? 'center' : '20%',
+                    right: type === 'radial' ? 'auto' : '20%',
+                    top: type === 'radial' ? 'middle' : '10%',
+                }]
+            });
+        };
+
+        window.updateAnalyticsDemo = function(overrideType = null) {
+            const type = overrideType || document.getElementById('demo-analytics-type').value;
+            const dataVals = [12, 19, 15, 25, 32];
+            const dataCats = ['2020', '2021', '2022', '2023', '2024'];
+            
+            if (type === 'pie') {
+                const pieData = dataCats.map((cat, i) => ({name: cat, value: dataVals[i]}));
+                window.analyticsPreview.setOption({
+                    tooltip: { trigger: 'item' },
+                    xAxis: { show: false },
+                    yAxis: { show: false },
+                    grid: { show: false },
+                    series: [{
+                        type: 'pie',
+                        radius: '60%',
+                        center: ['50%', '50%'],
+                        data: pieData,
+                        itemStyle: { borderRadius: 4, borderColor: '#fff', borderWidth: 2 }
+                    }]
+                }, true); // The 'true' flag clears old axes
+            } else {
+                window.analyticsPreview.setOption({
+                    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+                    grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true, show: false },
+                    xAxis: { show: true, type: 'category', data: dataCats, axisLabel: { color: '#64748b' } },
+                    yAxis: { show: true, type: 'value', axisLabel: { color: '#64748b' }, splitLine: { lineStyle: { color: '#e2e8f0' } } },
+                    series: [{
+                        data: dataVals,
+                        type: type,
+                        smooth: type === 'line',
+                        areaStyle: type === 'line' ? { opacity: 0.1, color: '#3b82f6' } : null,
+                        itemStyle: { color: '#3b82f6', borderRadius: type === 'bar' ? [4, 4, 0, 0] : 0 }
+                    }]
+                }, true);
+            }
+        };
     </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -254,7 +329,8 @@
 
                     <!-- Feature 1: Imports & Reference Types -->
                     <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
-                        <div class="flex-1 flex flex-col justify-center h-full min-h-[300px]">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">1. 40+ Reference Types & Master Imports</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Support for over 40 distinct publication types. Import existing references via RIS, BibTeX (.bib), or EndNote (.enw).</p>
@@ -263,60 +339,63 @@
                                 </p>
                             </div>
                         </div>
-                        <!-- CSS Visual: Scrolling Tag Cloud -->
-                        <div class="flex-1 bg-slate-50 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col p-4 shadow-inner overflow-hidden relative h-full min-h-[300px]">
-                            <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-50 dark:from-darkcard to-transparent z-10 pointer-events-none"></div>
-                            <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 shrink-0">Supported Types</h4>
-                            <div class="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-12 content-start flex-grow">
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Journal Article</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book Section</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Conference Paper</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Web Page</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Report</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Thesis</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Generic</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Artwork</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Audio Recording</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Bill</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Blog Post</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Case</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Computer Program</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dataset</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dictionary Entry</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Document</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">E-mail</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Encyclopedia Article</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Film or Broadcast</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Forum Post</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Government Document</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Grant</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Hearing</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Instant Message</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Interview</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Legal Rule or Regulation</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Letter</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Magazine Article</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Manuscript</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Map</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Newspaper Article</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Patent</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Podcast</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Preprint</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Presentation</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Social Media</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Standard</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Statute</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Television Episode</span>
-                                <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Video Recording</span>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-slate-50 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col p-4 shadow-inner overflow-hidden relative h-full">
+                                <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-50 dark:from-darkcard to-transparent z-10 pointer-events-none"></div>
+                                <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 shrink-0">Supported Types</h4>
+                                <div class="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-12 content-start flex-grow">
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Journal Article</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Book Section</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Conference Paper</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Web Page</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Report</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Thesis</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Generic</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Artwork</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Audio Recording</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Bill</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Blog Post</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Case</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Computer Program</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dataset</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Dictionary Entry</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Document</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">E-mail</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Encyclopedia Article</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Film or Broadcast</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Forum Post</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Government Document</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Grant</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Hearing</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Instant Message</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Interview</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Legal Rule or Regulation</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Letter</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Magazine Article</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Manuscript</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Map</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Newspaper Article</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Patent</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Podcast</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Preprint</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Presentation</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Social Media</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Standard</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Statute</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Television Episode</span>
+                                    <span class="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 text-[11px] font-medium rounded shadow-sm">Video Recording</span>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Feature 2: Filters & Export -->
                     <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
-                        <div class="flex-1 flex flex-col justify-center h-full min-h-[300px]">
-                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center w-full">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">2. Advanced Filtering & Multi-Format Export</h3>
                                 <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
                                     <li>• <strong>Filter by:</strong> Custom Theme, Type of Reference, or use the global searching box.</li>
@@ -326,26 +405,28 @@
                                 <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">Export references seamlessly to DOCX, RIS, BibTeX, or ENW formats.</p>
                             </div>
                         </div>
-                        <!-- CSS Visual: Filter UI Mockup matching the App -->
-                        <div class="flex-1 bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col p-4 shadow-sm relative overflow-hidden h-full min-h-[300px] w-full">
-                            <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center shrink-0">
-                                <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
-                                    <span class="text-gray-400 text-xs mr-2 shrink-0">🔍</span>
-                                    <span class="text-xs text-gray-500 font-medium font-mono whitespace-nowrap overflow-hidden text-ellipsis">Ctrl+F Search...</span>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col p-4 shadow-sm relative overflow-hidden">
+                                <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center shrink-0">
+                                    <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
+                                        <span class="text-gray-400 text-xs mr-2 shrink-0">🔍</span>
+                                        <span class="text-xs text-gray-500 font-medium font-mono whitespace-nowrap overflow-hidden text-ellipsis">Ctrl+F Search...</span>
+                                    </div>
+                                    <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Themes ▾</div>
+                                    <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Types ▾</div>
                                 </div>
-                                <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Themes ▾</div>
-                                <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-slate-900 whitespace-nowrap shrink-0">All Types ▾</div>
-                            </div>
-                            <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-sm overflow-hidden flex flex-col">
-                                <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700 shrink-0">
-                                    <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">AUTHOR</div>
-                                    <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">YEAR</div>
-                                    <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2] truncate">TITLE</div>
-                                </div>
-                                <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0">
-                                    <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Smith, J.</div>
-                                    <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2024</div>
-                                    <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate"><span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Literature</span> Review on AI</div>
+                                <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-sm overflow-hidden flex flex-col">
+                                    <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700 shrink-0">
+                                        <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">AUTHOR</div>
+                                        <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">YEAR</div>
+                                        <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2] truncate">TITLE</div>
+                                    </div>
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0">
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Smith, J.</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2024</div>
+                                        <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate"><span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">Literature</span> Review on AI</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -353,26 +434,40 @@
 
                     <!-- Feature 3: Mindmap Visualization -->
                     <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
-                        <div class="flex-1 flex flex-col justify-center h-full min-h-[300px] w-full">
-                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center w-full">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">3. Interactive Mindmap</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Visualize literature connections instantly with 5 dynamic chart layouts: Hierarchical map, Tree (horizontal/vertical), Spider Web, and SunBurst.</p>
-                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
+                                <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5 mb-4">
                                     <li>• <strong>Sort Nodes by:</strong> Theme, Author, Year, or Methodology.</li>
                                     <li>• <strong>Fully Customizable:</strong> Adjust font sizes, box styles, and connector lines to create publication-ready diagrams.</li>
                                 </ul>
+                                <p class="text-xs text-primary dark:text-blue-400 italic">Hover over the nodes in the preview to explore mock data.</p>
                             </div>
                         </div>
-                        <!-- Live ECharts Preview for Mindmap -->
-                        <div class="flex-1 bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full min-h-[300px] p-2 relative">
-                             <div id="mindmap-preview-container" class="w-full h-full min-h-[280px] bg-[#f8fafc] dark:bg-[#0f172a] rounded-lg"></div>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden">
+                                <!-- Interactive Control Header -->
+                                <div class="bg-slate-50 dark:bg-slate-800 p-2 flex gap-2 border-b border-gray-200 dark:border-slate-700 z-10 shrink-0">
+                                    <span class="text-[10px] font-bold text-slate-500 flex items-center">Layout:</span>
+                                    <select id="demo-mindmap-type" onchange="window.updateMindmapDemo()" class="text-xs bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-slate-700 dark:text-slate-200 outline-none cursor-pointer">
+                                        <option value="orthogonal">Tree (Horizontal)</option>
+                                        <option value="radial">Spider Web</option>
+                                    </select>
+                                </div>
+                                <!-- Canvas Container -->
+                                <div id="mindmap-preview-container" class="flex-1 w-full min-h-[250px] bg-[#f8fafc] dark:bg-[#0f172a]" style="background-image: radial-gradient(var(--tw-colors-slate-200) 1px, transparent 0); background-size: 20px 20px;"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Feature 4: Analytics -->
                     <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
-                        <div class="flex-1 flex flex-col justify-center h-full min-h-[300px] w-full">
-                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center w-full">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">4. Data Analytics</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Uncover patterns in your literature database with distinct analytical views:</p>
                                 <ul class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
@@ -380,16 +475,28 @@
                                     <li>📊 Methodological Distribution</li>
                                     <li>📊 Top Authors</li>
                                 </ul>
-                                <p class="text-xs text-slate-500 font-medium mb-4">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
+                                <p class="text-xs text-slate-500 font-medium">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
                             </div>
                         </div>
-                        <!-- Live ECharts Preview for Analytics -->
-                        <div class="flex-1 bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full min-h-[300px] p-2 relative">
-                             <div id="analytics-preview-container" class="w-full h-full min-h-[280px] bg-[#f1f5f9] dark:bg-[#1e293b] rounded-lg"></div>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden">
+                                <!-- Interactive Control Header -->
+                                <div class="bg-slate-50 dark:bg-slate-800 p-2 flex gap-2 border-b border-gray-200 dark:border-slate-700 z-10 shrink-0">
+                                    <span class="text-[10px] font-bold text-slate-500 flex items-center">Chart Style:</span>
+                                    <select id="demo-analytics-type" onchange="window.updateAnalyticsDemo()" class="text-xs bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-slate-700 dark:text-slate-200 outline-none cursor-pointer">
+                                        <option value="bar">Bar Chart</option>
+                                        <option value="line">Line Chart</option>
+                                        <option value="pie">Pie Chart</option>
+                                    </select>
+                                </div>
+                                <!-- Canvas Container -->
+                                <div id="analytics-preview-container" class="flex-1 w-full min-h-[250px] bg-[#f1f5f9] dark:bg-[#1e293b]"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Feature 5: Main App Shortcuts -->
+                    <!-- Feature 5: Main App Shortcuts (Center Block) -->
                     <div id="app-shortcuts" class="mb-16 scroll-mt-24">
                         <div class="bg-slate-800 dark:bg-slate-900 rounded-2xl p-8 border border-slate-700 shadow-lg text-white max-w-4xl mx-auto">
                             <h3 class="text-2xl font-bold mb-2 text-center text-white">5. Main Application Shortcuts</h3>
@@ -432,86 +539,79 @@
 
                      <!-- Feature 6: Internal Browser -->
                     <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
-                        <div class="flex-1 flex flex-col justify-center order-2 lg:order-2 h-full min-h-[300px] w-full">
-                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center w-full">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">6. Internal Research Browser</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-3">Browse online literature directly inside Literature Matrix without leaving the environment. Allows rapid metadata extraction straight into your database.</p>
                                 <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-1.5">
-                                    <li><a href="#page-api" onclick="switchPage('page-api')" class="text-primary hover:underline font-semibold">• Live Q-Rank (Try Demo)</a>: Instantly overlay journal impact rankings (Q1-Q4) directly onto Google Scholar search results.</li>
                                     <li>• <strong>Sci-Hub Integration:</strong> Built-in support for resolving DOIs on any website and Google Scholar.</li>
                                     <li>• Flexibly toggle these overlay features ON or OFF globally.</li>
                                 </ul>
                             </div>
                         </div>
-                        <!-- CSS Mockup: Browser Window -->
-                        <div class="flex-1 bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col overflow-hidden shadow-sm order-1 lg:order-1 h-full min-h-[300px] w-full">
-                            <!-- Browser Header -->
-                            <div class="bg-gray-200 dark:bg-slate-800 h-10 w-full flex items-center px-3 gap-3 border-b border-gray-300 dark:border-slate-600 shrink-0">
-                                <div class="flex gap-1.5 shrink-0"><div class="w-3 h-3 rounded-full bg-red-400"></div><div class="w-3 h-3 rounded-full bg-yellow-400"></div><div class="w-3 h-3 rounded-full bg-green-400"></div></div>
-                                <div class="bg-white dark:bg-slate-700 h-6 flex-1 rounded text-[10px] text-gray-500 flex items-center px-2 font-mono overflow-hidden whitespace-nowrap text-ellipsis">scholar.google.com</div>
-                                <!-- Toggles -->
-                                <div class="flex gap-2 shrink-0">
-                                    <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">Q-RANK</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
-                                    <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">SCI-HUB</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
-                                </div>
-                            </div>
-                            <!-- Browser Body with Q-Rank Examples -->
-                            <div class="flex-1 p-5 bg-white dark:bg-slate-900 flex flex-col gap-4 relative overflow-y-auto">
-                                <!-- Q1 Result -->
-                                <div class="border-b border-gray-100 dark:border-slate-800 pb-3">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <div class="h-4 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-                                        <span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q1</span>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col overflow-hidden shadow-sm">
+                                <!-- Browser Header -->
+                                <div class="bg-gray-200 dark:bg-slate-800 h-10 w-full flex items-center px-3 gap-3 border-b border-gray-300 dark:border-slate-600 shrink-0">
+                                    <div class="flex gap-1.5 shrink-0"><div class="w-3 h-3 rounded-full bg-red-400"></div><div class="w-3 h-3 rounded-full bg-yellow-400"></div><div class="w-3 h-3 rounded-full bg-green-400"></div></div>
+                                    <div class="bg-white dark:bg-slate-700 h-6 flex-1 rounded text-[10px] text-gray-500 flex items-center px-2 font-mono overflow-hidden whitespace-nowrap text-ellipsis">scholar.google.com</div>
+                                    <!-- Toggles -->
+                                    <div class="flex gap-2 shrink-0">
+                                        <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">SCI-HUB</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
                                     </div>
-                                    <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
-                                    <div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
                                 </div>
-                                <!-- Q2 Result -->
-                                <div class="border-b border-gray-100 dark:border-slate-800 pb-3 opacity-80">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <div class="h-4 w-3/4 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-                                        <span class="bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q2</span>
+                                <!-- Browser Body -->
+                                <div class="flex-1 p-5 bg-white dark:bg-slate-900 flex flex-col gap-4 relative overflow-y-auto">
+                                    <div class="border-b border-gray-100 dark:border-slate-800 pb-3">
+                                        <div class="h-4 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded mb-1"></div>
+                                        <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+                                        <div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
                                     </div>
-                                    <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
-                                </div>
-                                <!-- Q3/Q4 Results -->
-                                <div class="opacity-60">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <div class="h-4 w-1/2 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-                                        <span class="bg-yellow-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q3</span>
+                                    <div class="border-b border-gray-100 dark:border-slate-800 pb-3 opacity-80">
+                                        <div class="h-4 w-3/4 bg-blue-100 dark:bg-blue-900/30 rounded mb-1"></div>
+                                        <div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
                                     </div>
-                                    <div class="h-2 w-4/5 bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+                                    <div class="opacity-60">
+                                        <div class="h-4 w-1/2 bg-blue-100 dark:bg-blue-900/30 rounded mb-1"></div>
+                                        <div class="h-2 w-4/5 bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+                                    </div>
+                                    <div class="absolute bottom-4 left-4 bg-orange-100 text-orange-800 border border-orange-200 text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1 shadow-sm"><span>🔓</span> Open via Sci-Hub</div>
                                 </div>
-
-                                <div class="absolute bottom-4 left-4 bg-orange-100 text-orange-800 border border-orange-200 text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1 shadow-sm"><span>🔓</span> Open via Sci-Hub</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Feature 7: Themes -->
                     <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
-                         <div class="flex-1 flex flex-col justify-center h-full min-h-[300px] w-full">
-                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center w-full">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">7. App Appearance & Themes</h3>
                                 <p class="text-gray-600 dark:text-gray-400">Work comfortably in any lighting condition. Choose between a crisp <strong>Light mode</strong>, a sleek <strong>Dark mode</strong> to reduce eye strain during late-night research sessions, or set it to match your <strong>System</strong> default automatically.</p>
                             </div>
                         </div>
-                         <div class="flex-1 grid grid-cols-2 gap-4 h-full min-h-[300px] w-full">
-                            <div class="bg-slate-100 rounded-xl border border-gray-200 flex flex-col items-center justify-center p-4 shadow-sm h-full">
-                                <span class="text-4xl mb-2 drop-shadow-md">☀️</span>
-                                <p class="text-slate-700 font-bold text-sm">Light Theme</p>
-                            </div>
-                            <div class="bg-[#1e293b] rounded-xl border border-slate-700 flex flex-col items-center justify-center p-4 shadow-sm h-full">
-                                <span class="text-4xl mb-2 drop-shadow-md">🌙</span>
-                                <p class="text-slate-200 font-bold text-sm">Dark Theme</p>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="grid grid-cols-2 gap-4 h-full">
+                                <div class="bg-slate-100 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center p-4 shadow-sm">
+                                    <span class="text-4xl mb-2 drop-shadow-md">☀️</span>
+                                    <p class="text-slate-700 font-bold text-sm">Light Theme</p>
+                                </div>
+                                <div class="bg-[#1e293b] rounded-xl border border-slate-700 h-full flex flex-col items-center justify-center p-4 shadow-sm">
+                                    <span class="text-4xl mb-2 drop-shadow-md">🌙</span>
+                                    <p class="text-slate-200 font-bold text-sm">Dark Theme</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Feature 8: AI Prompts -->
                     <div class="flex flex-col lg:flex-row gap-12 items-stretch">
-                        <div class="flex-1 flex flex-col justify-center h-full min-h-[300px] w-full">
-                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl relative overflow-hidden h-full flex flex-col justify-center w-full">
+                        <!-- Text Block (Always Left) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 text-6xl pointer-events-none">🤖</div>
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">8. AI Prompt Generator</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Bridge the gap between your library and AI assistants. Automatically generate highly optimized instructions for LLMs based on single or batch papers in your database.</p>
@@ -523,16 +623,19 @@
                                 <p class="text-xs text-slate-500 dark:text-slate-400 font-medium relative z-10">Just copy the generated prompt to your clipboard and paste it directly into tools like <span class="text-primary dark:text-blue-400">Google NotebookLM</span>, <span class="text-primary dark:text-blue-400">Jenni AI</span>, or <span class="text-primary dark:text-blue-400">Claude</span> alongside your uploaded PDFs.</p>
                             </div>
                         </div>
-                        <div class="flex-1 bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col items-center justify-center p-6 text-center shadow-sm h-full min-h-[300px] w-full">
-                            <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 w-full mb-6 relative">
-                                <p class="text-left text-[10px] font-mono text-gray-500 dark:text-gray-400 mb-3">"Summarize the following papers focusing on methodology and gaps..."</p>
-                                <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-full mb-2"></div>
-                                <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-5/6 mb-2"></div>
-                                <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-4/6"></div>
+                        <!-- Visual Block (Always Right) -->
+                        <div class="flex-1 w-full">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col items-center justify-center p-6 text-center shadow-sm">
+                                <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 w-full mb-6 relative">
+                                    <p class="text-left text-[10px] font-mono text-gray-500 dark:text-gray-400 mb-3">"Summarize the following papers focusing on methodology and gaps..."</p>
+                                    <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-full mb-2"></div>
+                                    <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-5/6 mb-2"></div>
+                                    <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-4/6"></div>
+                                </div>
+                                <button class="bg-gray-800 dark:bg-primary text-white text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-700 dark:hover:bg-blue-600 transition shadow-sm font-semibold">
+                                    <span>📋</span> Copy AI Prompt to Clipboard
+                                </button>
                             </div>
-                            <button class="bg-gray-800 dark:bg-primary text-white text-sm px-6 py-2.5 rounded-lg flex items-center gap-2 hover:bg-gray-700 dark:hover:bg-blue-600 transition shadow-sm font-semibold">
-                                <span>📋</span> Copy AI Prompt to Clipboard
-                            </button>
                         </div>
                     </div>
 
