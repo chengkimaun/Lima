@@ -120,7 +120,7 @@
                         { 
                             name: 'AI Automation', 
                             itemStyle: { color: '#5470c6', borderColor: '#5470c6' },
-                            lineStyle: { color: '#5470c6', width: 3 },
+                            lineStyle: { color: '#5470c6', width: 3, type: 'dashed' },
                             children: [
                                 { name: 'Finding: 20% Faster', itemStyle: { color: '#5470c6' }, value: 1 }
                             ]
@@ -130,7 +130,8 @@
                             itemStyle: { color: '#91cc75', borderColor: '#91cc75' },
                             lineStyle: { color: '#91cc75', width: 3 },
                             children: [
-                                { name: 'Source: EHRs', itemStyle: { color: '#91cc75' }, value: 1 }
+                                { name: 'Source: EHRs', itemStyle: { color: '#91cc75' }, value: 1 },
+                                { name: 'Limitation: Bias', itemStyle: { color: '#91cc75' }, value: 1 }
                             ]
                         }
                     ]
@@ -140,9 +141,29 @@
                     tooltip: { 
                         trigger: 'item', 
                         triggerOn: 'mousemove',
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        borderColor: '#cbd5e1',
+                        textStyle: { color: '#1e293b' },
+                        extraCssText: 'box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-radius: 6px;',
                         formatter: function (params) {
                             if(params.data.name === 'Literature Matrix') return '<b>Master Database</b>';
-                            return `<b>${params.data.name}</b><br/><i>Click to expand/collapse nodes.</i>`;
+                            if(params.data.value) return ''; // Don't show tooltip for leaf nodes
+                            
+                            // Mock data for parent nodes
+                            let mockData = {
+                                'Smith (2024)': { method: 'Qualitative Analysis', findings: 'Identified key patterns...', gap: 'Small sample size limits generalizability.'},
+                                'AI Automation': { method: 'Systematic Review', findings: 'Automation speeds up processes by 20%.', gap: 'Lack of longitudinal studies.'},
+                                'Clinical Data': { method: 'Retrospective Cohort', findings: 'EHRs provide valuable insights.', gap: 'Potential for inherent biases.'}
+                            };
+                            
+                            let d = mockData[params.data.name] || { method: 'N/A', findings: 'N/A', gap: 'N/A' };
+                            
+                            return `<div style="font-weight: bold; font-size: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 5px;">${params.data.name}</div>
+                                    <div style="font-size: 12px; line-height: 1.5;">
+                                    <strong>Method:</strong> ${d.method}<br/>
+                                    <strong>Findings:</strong> ${d.findings}<br/>
+                                    <strong>Gap:</strong> <span style="color: #e74c3c;">${d.gap}</span>
+                                    </div>`;
                         }
                     },
                     series: [{
@@ -243,6 +264,15 @@
                 }, true);
             }
         };
+
+        // Payment Modal Logic
+        function openPaymentModal() {
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+        
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
     </script>
     <style>
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -259,27 +289,28 @@
                 Literature Matrix
             </a>
             
-            <!-- Mobile Controls -->
-            <div class="flex items-center gap-4 lg:hidden">
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none" aria-label="Toggle Dark Mode">
-                    <span id="theme-icon-mobile" class="text-xl">🌙</span>
+            <!-- Global Theme Toggle & Mobile Menu -->
+            <div class="flex items-center gap-4">
+                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition focus:outline-none" aria-label="Toggle Dark Mode">
+                    <span id="theme-icon" class="text-xl">🌙</span>
                 </button>
-                <button onclick="toggleMobileMenu()" class="p-2 text-gray-600 dark:text-gray-300 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                </button>
+                <div class="lg:hidden">
+                    <button onclick="toggleMobileMenu()" class="p-2 text-gray-600 dark:text-gray-300 focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Desktop Menu -->
-            <div class="hidden lg:flex items-center space-x-6 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base">
+            <div class="hidden lg:flex items-center space-x-6 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base absolute left-1/2 transform -translate-x-1/2">
                 <button onclick="switchPage('page-home')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Home</button>
                 <button onclick="switchPage('page-home', 'word-addin')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</button>
                 <button onclick="switchPage('page-pricing')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</button>
                 <button onclick="switchPage('page-tutorials')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Tutorials</button>
-                
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition shrink-0 ml-2" aria-label="Toggle Dark Mode">
-                    <span id="theme-icon" class="text-xl">🌙</span>
-                </button>
-                <button onclick="switchPage('page-download')" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm shrink-0 ml-2">Download</button>
+            </div>
+            
+            <div class="hidden lg:block">
+                 <button onclick="switchPage('page-download')" class="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm shrink-0">Download</button>
             </div>
             
             <!-- Mobile Menu Dropdown -->
@@ -323,14 +354,14 @@
             <section id="features" class="py-16 bg-white dark:bg-darkbg border-t border-gray-100 dark:border-slate-800 transition-colors duration-300 scroll-mt-12">
                 <div class="container mx-auto px-6">
                     <div class="text-center max-w-2xl mx-auto mb-16">
-                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Section I — Main App Overview</h2>
+                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Chapter 1 — Main App Overview</h2>
                         <p class="text-gray-600 dark:text-gray-400">A powerful central database and built-in browser engine to collect, analyze, and visualize research papers effortlessly.</p>
                     </div>
 
                     <!-- Feature 1: Imports & Reference Types -->
-                    <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">1. 40+ Reference Types & Master Imports</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Support for over 40 distinct publication types. Import existing references via RIS, BibTeX (.bib), or EndNote (.enw).</p>
@@ -340,8 +371,8 @@
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="bg-slate-50 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col p-4 shadow-inner overflow-hidden relative h-full">
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-slate-50 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 flex flex-col p-4 shadow-inner overflow-hidden relative h-full min-h-[300px]">
                                 <div class="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-50 dark:from-darkcard to-transparent z-10 pointer-events-none"></div>
                                 <h4 class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 shrink-0">Supported Types</h4>
                                 <div class="flex flex-wrap gap-2 overflow-y-auto pr-2 pb-12 content-start flex-grow">
@@ -392,9 +423,9 @@
                     </div>
 
                     <!-- Feature 2: Filters & Export -->
-                    <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">2. Advanced Filtering & Multi-Format Export</h3>
                                 <ul class="text-sm text-gray-700 dark:text-gray-300 space-y-2 mb-4">
@@ -406,8 +437,8 @@
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col p-4 shadow-sm relative overflow-hidden">
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col p-4 shadow-sm relative overflow-hidden min-h-[300px]">
                                 <div class="bg-white dark:bg-slate-800 w-full rounded shadow-sm border border-gray-200 dark:border-slate-600 p-3 mb-2 flex gap-2 items-center shrink-0">
                                     <div class="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 flex-1 flex items-center bg-gray-50 dark:bg-slate-900 overflow-hidden">
                                         <span class="text-gray-400 text-xs mr-2 shrink-0">🔍</span>
@@ -433,9 +464,9 @@
                     </div>
 
                     <!-- Feature 3: Mindmap Visualization -->
-                    <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">3. Interactive Mindmap</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Visualize literature connections instantly with 5 dynamic chart layouts: Hierarchical map, Tree (horizontal/vertical), Spider Web, and SunBurst.</p>
@@ -447,8 +478,8 @@
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden">
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden min-h-[300px]">
                                 <!-- Interactive Control Header -->
                                 <div class="bg-slate-50 dark:bg-slate-800 p-2 flex gap-2 border-b border-gray-200 dark:border-slate-700 z-10 shrink-0">
                                     <span class="text-[10px] font-bold text-slate-500 flex items-center">Layout:</span>
@@ -458,15 +489,15 @@
                                     </select>
                                 </div>
                                 <!-- Canvas Container -->
-                                <div id="mindmap-preview-container" class="flex-1 w-full min-h-[250px] bg-[#f8fafc] dark:bg-[#0f172a]" style="background-image: radial-gradient(var(--tw-colors-slate-200) 1px, transparent 0); background-size: 20px 20px;"></div>
+                                <div id="mindmap-preview-container" class="flex-1 w-full bg-[#f8fafc] dark:bg-[#0f172a]" style="background-image: radial-gradient(var(--tw-colors-slate-200) 1px, transparent 0); background-size: 20px 20px;"></div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Feature 4: Analytics -->
-                    <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">4. Data Analytics</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Uncover patterns in your literature database with distinct analytical views:</p>
@@ -479,8 +510,8 @@
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden">
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-white dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 shadow-sm h-full flex flex-col relative overflow-hidden min-h-[300px]">
                                 <!-- Interactive Control Header -->
                                 <div class="bg-slate-50 dark:bg-slate-800 p-2 flex gap-2 border-b border-gray-200 dark:border-slate-700 z-10 shrink-0">
                                     <span class="text-[10px] font-bold text-slate-500 flex items-center">Chart Style:</span>
@@ -491,7 +522,7 @@
                                     </select>
                                 </div>
                                 <!-- Canvas Container -->
-                                <div id="analytics-preview-container" class="flex-1 w-full min-h-[250px] bg-[#f1f5f9] dark:bg-[#1e293b]"></div>
+                                <div id="analytics-preview-container" class="flex-1 w-full bg-[#f1f5f9] dark:bg-[#1e293b]"></div>
                             </div>
                         </div>
                     </div>
@@ -538,9 +569,9 @@
                     </div>
 
                      <!-- Feature 6: Internal Browser -->
-                    <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">6. Internal Research Browser</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-3">Browse online literature directly inside Literature Matrix without leaving the environment. Allows rapid metadata extraction straight into your database.</p>
@@ -551,8 +582,8 @@
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col overflow-hidden shadow-sm">
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col overflow-hidden shadow-sm min-h-[300px]">
                                 <!-- Browser Header -->
                                 <div class="bg-gray-200 dark:bg-slate-800 h-10 w-full flex items-center px-3 gap-3 border-b border-gray-300 dark:border-slate-600 shrink-0">
                                     <div class="flex gap-1.5 shrink-0"><div class="w-3 h-3 rounded-full bg-red-400"></div><div class="w-3 h-3 rounded-full bg-yellow-400"></div><div class="w-3 h-3 rounded-full bg-green-400"></div></div>
@@ -561,54 +592,50 @@
                                     <div class="flex gap-2 shrink-0">
                                         <div class="flex items-center gap-1"><span class="text-[8px] font-bold text-gray-500">SCI-HUB</span><div class="w-5 h-3 bg-blue-500 rounded-full relative"><div class="absolute right-0.5 top-0.5 w-2 h-2 bg-white rounded-full"></div></div></div>
                                     </div>
-                                </div>
-                                <!-- Browser Body -->								
-								   <!-- Browser Body with Q-Rank Examples -->
+                                </div>							
+								<!-- Browser Body with Q-Rank Examples -->
 								<div class="flex-1 p-5 bg-white dark:bg-slate-900 flex flex-col gap-4 relative overflow-y-auto">
-									<!-- Q1 Result -->
-									<div class="border-b border-gray-100 dark:border-slate-800 pb-3">
-										<div class="flex items-center gap-2 mb-1">
-											<div class="h-4 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-											<span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q1</span>
-										</div>
-										<div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
-										<div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
+								<!-- Q1 Result -->
+								<div class="border-b border-gray-100 dark:border-slate-800 pb-3">
+									<div class="flex items-center gap-2 mb-1">
+										<div class="h-4 w-2/3 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+										<span class="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q1</span>
 									</div>
-									<!-- Q2 Result -->
-									<div class="border-b border-gray-100 dark:border-slate-800 pb-3 opacity-80">
-										<div class="flex items-center gap-2 mb-1">
-											<div class="h-4 w-3/4 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-											<span class="bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q2</span>
-										</div>
-										<div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+									<div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+									<div class="h-2 w-5/6 bg-gray-100 dark:bg-slate-800 rounded mt-1"></div>
+								</div>
+								<!-- Q2 Result -->
+								<div class="border-b border-gray-100 dark:border-slate-800 pb-3 opacity-80">
+									<div class="flex items-center gap-2 mb-1">
+										<div class="h-4 w-3/4 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+										<span class="bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q2</span>
 									</div>
-									<!-- Q3/Q4 Results -->
-									<div class="opacity-60">
-										<div class="flex items-center gap-2 mb-1">
-											<div class="h-4 w-1/2 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-											<span class="bg-yellow-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q3</span>
-										</div>
-										<div class="h-2 w-4/5 bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+									<div class="h-2 w-full bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+								</div>
+								<!-- Q3/Q4 Results -->
+								<div class="opacity-60">
+									<div class="flex items-center gap-2 mb-1">
+										<div class="h-4 w-1/2 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
+										<span class="bg-yellow-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm">Q3</span>
 									</div>
-
-									<div class="absolute bottom-4 left-4 bg-orange-100 text-orange-800 border border-orange-200 text-[9px] font-bold px-2 py-1 rounded flex items-center gap-1 shadow-sm"><span>🔓</span> Open via Sci-Hub</div>
-								</div>								
+									<div class="h-2 w-4/5 bg-gray-100 dark:bg-slate-800 rounded mt-2"></div>
+								</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Feature 7: Themes -->
-                    <div class="flex flex-col lg:flex-row gap-12 mb-16 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 mb-16 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center">
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">7. App Appearance & Themes</h3>
                                 <p class="text-gray-600 dark:text-gray-400">Work comfortably in any lighting condition. Choose between a crisp <strong>Light mode</strong>, a sleek <strong>Dark mode</strong> to reduce eye strain during late-night research sessions, or set it to match your <strong>System</strong> default automatically.</p>
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="grid grid-cols-2 gap-4 h-full">
+                        <div class="w-full lg:w-1/2">
+                            <div class="grid grid-cols-2 gap-4 h-full min-h-[300px]">
                                 <div class="bg-slate-100 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center p-4 shadow-sm">
                                     <span class="text-4xl mb-2 drop-shadow-md">☀️</span>
                                     <p class="text-slate-700 font-bold text-sm">Light Theme</p>
@@ -622,9 +649,9 @@
                     </div>
 
                     <!-- Feature 8: AI Prompts -->
-                    <div class="flex flex-col lg:flex-row gap-12 items-stretch">
+                    <div class="flex flex-col lg:flex-row gap-8 items-stretch">
                         <!-- Text Block (Always Left) -->
-                        <div class="flex-1 w-full">
+                        <div class="w-full lg:w-1/2">
                             <div class="bg-blue-50 dark:bg-blue-900/10 border-l-4 border-primary p-6 rounded-r-xl h-full flex flex-col justify-center relative overflow-hidden">
                                 <div class="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 text-6xl pointer-events-none">🤖</div>
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">8. AI Prompt Generator</h3>
@@ -638,8 +665,8 @@
                             </div>
                         </div>
                         <!-- Visual Block (Always Right) -->
-                        <div class="flex-1 w-full">
-                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full flex flex-col items-center justify-center p-6 text-center shadow-sm">
+                        <div class="w-full lg:w-1/2">
+                            <div class="bg-slate-100 dark:bg-darkcard rounded-xl border border-gray-200 dark:border-slate-700 h-full min-h-[300px] flex flex-col items-center justify-center p-6 text-center shadow-sm">
                                 <div class="bg-white dark:bg-slate-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-slate-600 w-full mb-6 relative">
                                     <p class="text-left text-[10px] font-mono text-gray-500 dark:text-gray-400 mb-3">"Summarize the following papers focusing on methodology and gaps..."</p>
                                     <div class="h-1.5 bg-gray-200 dark:bg-slate-600 rounded w-full mb-2"></div>
@@ -800,14 +827,14 @@
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$15</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
+                        <button onclick="openPaymentModal()" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
                     </div>
                     <!-- 3 Months -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">3 Months</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$35</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
+                        <button onclick="openPaymentModal()" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
                     </div>
                     <!-- 6 Months -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
@@ -815,22 +842,22 @@
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$70</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <a href="#" class="block w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</a>
+                        <button onclick="openPaymentModal()" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
                     </div>
                     <!-- 1 Year -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Year</h3>
                         <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$140</div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-                        <a href="#" class="block w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</a>
+                        <button onclick="openPaymentModal()" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
                     </div>
                     <!-- Lifetime -->
-                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition transform lg:-translate-y-4 mt-6 lg:mt-0">
+                    <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition mb-0 pb-6 lg:mb-4 lg:pb-10">
                         <div class="text-yellow-400 text-2xl mb-2">👑</div>
                         <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
                         <div class="text-3xl font-extrabold text-white mb-4">$299</div>
                         <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
-                        <a href="#" class="block w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</a>
+                        <button onclick="openPaymentModal()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
                     </div>
                 </div>
             </div>
@@ -969,6 +996,71 @@
         </div>
 
     </main>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4">
+        <div class="bg-white dark:bg-darkbg w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-slate-700">
+            <div class="flex justify-between items-center p-6 border-b border-gray-100 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">Select Payment Method</h3>
+                <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                
+                <!-- ABA Pay -->
+                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#005f73] rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">ABA</div>
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">ABA Bank (KHQR)</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Scan to pay directly from your ABA app</div>
+                        </div>
+                    </div>
+                    <button class="text-sm font-semibold text-primary dark:text-blue-400 group-hover:underline">Show QR</button>
+                </div>
+                
+                <!-- QR Image (Hidden by default, shown via JS if implemented) -->
+                <div class="hidden justify-center py-4">
+                    <img src="image_838a39.jpg" alt="ABA QR Code" class="max-w-[200px] border rounded shadow-md">
+                </div>
+
+                <!-- PayPal -->
+                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#003087] rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">PayPal</div>
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">PayPal</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Pay securely with your PayPal account</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visa/Mastercard -->
+                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded flex items-center justify-center text-slate-800 dark:text-white font-bold text-xs shadow-sm">VISA</div>
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">Credit / Debit Card</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Visa, Mastercard, etc.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bitcoin -->
+                <div class="border border-gray-200 dark:border-slate-700 rounded-xl p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition cursor-pointer group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-[#f7931a] rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">BTC</div>
+                        <div>
+                            <div class="font-bold text-slate-900 dark:text-white">Bitcoin</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Pay using Cryptocurrency</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800 mt-auto">
