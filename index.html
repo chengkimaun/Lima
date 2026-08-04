@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- NEW: Prevents mobile browsers from forcing their own auto-dark mode -->
+    <!-- Prevents mobile browsers from forcing their own auto-dark mode -->
     <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
     <title>Literature Matrix | Academic Reference & Citation Manager</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -34,15 +35,14 @@
             const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDark) {
                 document.documentElement.classList.add('dark');
-                document.documentElement.style.colorScheme = 'dark'; // Blocks mobile auto-inversion
             } else {
                 document.documentElement.classList.remove('dark');
-                document.documentElement.style.colorScheme = 'light'; // Blocks mobile auto-inversion
             }
             updateThemeIcons(isDark);
+            updateThemeColorMeta(isDark);
         }
 
-        // NEW: Helper function to safely update both Desktop and Mobile icons
+        // Helper function to safely update both Desktop and Mobile icons
         function updateThemeIcons(isDark) {
             const icon = document.getElementById('theme-icon');
             const mobileIcon = document.getElementById('theme-icon-mobile');
@@ -50,12 +50,24 @@
             if (mobileIcon) mobileIcon.innerText = isDark ? '☀️' : '🌙';
         }
 
+        // NEW: Dynamically update mobile browser address bar color
+        function updateThemeColorMeta(isDark) {
+            let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+            if (!metaThemeColor) {
+                metaThemeColor = document.createElement('meta');
+                metaThemeColor.name = 'theme-color';
+                document.head.appendChild(metaThemeColor);
+            }
+            metaThemeColor.content = isDark ? '#0f172a' : '#f8fafc';
+        }
+
         function toggleTheme() {
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; // Blocks mobile auto-inversion
+            
             updateThemeIcons(isDark);
+            updateThemeColorMeta(isDark);
             
             if(window.mindmapPreview) {
                 initLivePreviews(); 
@@ -68,13 +80,13 @@
             if (isDark) {
                 document.documentElement.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
-                document.documentElement.style.colorScheme = 'dark'; // Blocks mobile auto-inversion
             } else {
                 document.documentElement.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
-                document.documentElement.style.colorScheme = 'light'; // Blocks mobile auto-inversion
             }
+            
             updateThemeIcons(isDark);
+            updateThemeColorMeta(isDark);
             
             if(window.mindmapPreview) {
                 initLivePreviews(); 
@@ -93,11 +105,9 @@
             
             slides.forEach((slide, index) => {
                 if (index === currentSlide) {
-                    // Active slide becomes relative to dictate container height
                     slide.classList.remove('absolute', 'top-0', 'left-0', 'w-full', 'opacity-0', 'z-0', 'pointer-events-none');
                     slide.classList.add('relative', 'opacity-100', 'z-10');
                 } else {
-                    // Hidden slides become absolute so they don't stretch the container
                     slide.classList.remove('relative', 'opacity-100', 'z-10');
                     slide.classList.add('absolute', 'top-0', 'left-0', 'w-full', 'opacity-0', 'z-0', 'pointer-events-none');
                 }
@@ -164,22 +174,6 @@
             startAutoSlide();
         };
 
-        // // --- Independent Hero Image Toggle (Smooth Fade) ---
-        // window.toggleHeroAppImage = function() {
-        //     const darkImg = document.getElementById('hero-app-dark');
-        //     if (darkImg) {
-        //         if (darkImg.classList.contains('opacity-0')) {
-        //             // Fade to Dark
-        //             darkImg.classList.remove('opacity-0');
-        //             darkImg.classList.add('opacity-100');
-        //         } else {
-        //             // Fade to Light
-        //             darkImg.classList.remove('opacity-100');
-        //             darkImg.classList.add('opacity-0');
-        //         }
-        //     }
-        // };
-
         // --- Native-Style Mouse Tooltip Tracking ---
         document.addEventListener('DOMContentLoaded', () => {
             const carouselContainer = document.getElementById('hero-carousel-container');
@@ -221,22 +215,6 @@
                 });
             }
         });
-
-        // Used by Feature 7 cards to hard-set the theme
-        function setAppTheme(themeType) {
-            if (themeType === 'dark') {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                document.getElementById('theme-icon').innerText = '☀️';
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                document.getElementById('theme-icon').innerText = '🌙';
-            }
-            if(window.mindmapPreview) {
-                initLivePreviews(); 
-            }
-        }
         
         function toggleMobileMenu() {
             const menu = document.getElementById('mobile-menu');
@@ -255,18 +233,16 @@
                 targetPage.classList.add('block');
             }
 
-            // --- NEW: Update the URL so the user can copy and share it ---
+            // Update the URL so the user can copy and share it
             let hashName = pageId.replace('page-', '');
             if (scrollToId) {
                 hashName = scrollToId; // e.g., #word-addin
             }
-            // Update URL without refreshing the page
             if (history.pushState) {
                 history.pushState(null, null, '#' + hashName);
             } else {
                 location.hash = '#' + hashName;
             }
-            // -------------------------------------------------------------
 
             if (scrollToId) {
                 setTimeout(() => {
@@ -286,10 +262,10 @@
             }
 
             if(pageId === 'page-home') {
-                setTimeout(() => {
+                 setTimeout(() => {
                     if(window.mindmapPreview) window.mindmapPreview.resize();
                     if(window.analyticsPreview) window.analyticsPreview.resize();
-                }, 100);
+                 }, 100);
             }
         }
 
@@ -299,21 +275,20 @@
             initTableFilter();
             fetchChangelog();
 
-            // --- NEW: Read the URL to open the shared page ---
-            const hash = window.location.hash.substring(1); // removes the '#'
+            // Read the URL to open the shared page
+            const hash = window.location.hash.substring(1); 
             if (hash) {
                 if (hash === 'word-addin') {
-                    // Special case for jumping to the add-in section on the home page
                     switchPage('page-home', 'word-addin');
+                } else if (hash === 'features') {
+                    switchPage('page-home', 'features');
                 } else {
-                    // Generic page loader (e.g., #pricing opens page-pricing)
                     const targetPageId = 'page-' + hash;
                     if (document.getElementById(targetPageId)) {
                         switchPage(targetPageId);
                     }
                 }
             }
-            // -------------------------------------------------
         });
 
         // --- Fetch Changelog Logic ---
@@ -322,7 +297,6 @@
             const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
             
             try {
-                // Try to fetch via a raw CORS proxy
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
                 const response = await fetch(proxyUrl);
                 
@@ -526,13 +500,14 @@ Version 1.0.0 Release Notes
                                 <div class="h-px bg-gray-200 dark:bg-slate-700 flex-1"></div>
                              </div>`;
                 } else if (t.startsWith('* ')) {
-                    if (!inList) { html += `<ul class="list-disc list-outside ml-5 pl-1 text-gray-600 dark:text-gray-300 text-sm space-y-2 mb-6">`; inList = true; }
+                    if (!inList) { html += `<ul class="list-none text-gray-600 dark:text-gray-300 text-sm space-y-2 mb-6">`; inList = true; }
                     let itemText = t.substring(2);
                     const colonSplit = itemText.split(':');
+                    // Applying hanging indent classes to li
                     if(colonSplit.length > 1) {
-                        html += `<li><strong class="text-slate-800 dark:text-slate-200">${colonSplit[0]}:</strong>${colonSplit.slice(1).join(':')}</li>`;
+                        html += `<li class="pl-5 -indent-5"><span class="mr-1">•</span> <strong class="text-slate-800 dark:text-slate-200">${colonSplit[0]}:</strong>${colonSplit.slice(1).join(':')}</li>`;
                     } else {
-                        html += `<li>${itemText}</li>`;
+                        html += `<li class="pl-5 -indent-5"><span class="mr-1">•</span> ${itemText}</li>`;
                     }
                 } else if (t.length > 0) {
                     if (inList) { html += '</ul>'; inList = false; }
@@ -599,10 +574,8 @@ Version 1.0.0 Release Notes
                 const cardBgColor = isDark ? '#1e293b' : '#ffffff';
                 const defaultTextColor = isDark ? '#f8fafc' : '#334155';
 
-                // Grab the layout type
                 const currentLayoutType = document.getElementById('demo-mindmap-type') ? document.getElementById('demo-mindmap-type').value : 'orthogonal';
                 
-                // Smart Flags based on the real mindmap.html logic
                 const isRadial = currentLayoutType === 'radial';
                 const isSunburst = currentLayoutType === 'sunburst';
                 const isHierarchy = currentLayoutType === 'hierarchy';
@@ -625,7 +598,6 @@ Version 1.0.0 Release Notes
                     };
                 }
 
-                // Data Structure with dynamic line styles
                 const mindmapData = {
                     name: 'Chapter 1', 
                     itemStyle: { color: '#2c3e50', borderColor: '#2c3e50' },
@@ -696,7 +668,6 @@ Version 1.0.0 Release Notes
                         orient: orient,
                         data: isSunburst ? mindmapData.children : [mindmapData],
                         
-                        // Dynamic Placement (Gives the Spider Web enough room to breathe)
                         top: isRadial ? '5%' : (isSunburst ? 'middle' : (isTB ? '15%' : '10%')),
                         bottom: isRadial ? '5%' : (isSunburst ? 'auto' : (isTB ? '15%' : '10%')),
                         left: isRadial ? '5%' : (isSunburst ? 'center' : (isTB ? 'center' : '20%')),
@@ -741,15 +712,6 @@ Version 1.0.0 Release Notes
                 window.updateAnalyticsDemo(); 
             }
         }
-
-        window.addEventListener('resize', () => {
-            if(window.mindmapPreview) window.mindmapPreview.resize();
-            if(window.analyticsPreview) window.analyticsPreview.resize();
-        });
-
-        window.updateMindmapDemo = function() {
-            initLivePreviews();
-        };
 
         window.updateAnalyticsDemo = function() {
             const selector = document.getElementById('demo-analytics-type');
@@ -1388,7 +1350,7 @@ C7  - [Sample & Data Scope]`;
                                 
                                 <div class="bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700 p-4 flex-1">
                                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Generated Citation</span>
-                                    <p id="citation-output" class="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-serif">
+                                    <p id="citation-output" class="text-sm text-slate-800 dark:text-slate-200 leading-relaxed font-serif pl-6 -indent-6">
                                         Smith, J. (2024). <i>Literature Review on AI</i>. Journal of Future Tech, 12(4), 45-60. <br/><a href="#" class="text-[#0088cc] hover:underline mt-1 inline-block">https://doi.org/10.1234/jft.2024.045</a>
                                     </p>
                                 </div>
@@ -1434,7 +1396,7 @@ C7  - [Sample & Data Scope]`;
                                         <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">YEAR</div>
                                         <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2] truncate">TITLE</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0 matrix-row" data-type="journal" data-theme="ai">
+                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="journal" data-theme="ai">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Smith, J.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2024</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate row-title">Literature Review on AI</div>
@@ -1501,13 +1463,13 @@ C7  - [Sample & Data Scope]`;
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">5. Data Analytics</h3>
                                 <p class="text-gray-600 dark:text-gray-400 mb-4">Uncover patterns in your literature database with distinct analytical views:</p>
                                 <ul class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 dark:text-gray-300 mb-4">
-                                    <li><strong>• Publication Trends</strong></li>
-                                    <li><strong>• Methodological Distribution</strong></li>
-                                    <li><strong>• Top Authors</strong></li>
-                                    <li><strong>• Journal Impact (Q-Rank)</strong></li>
-                                    <li><strong>• Synthesis Table (List View)</strong></li>
+                                    <li>📊 Publication Trends</li>
+                                    <li>📊 Methodological Distribution</li>
+                                    <li>📊 Top Authors</li>
+                                    <li>📊 Journal Impact (Q-Rank)</li>
+                                    <li>📊 Synthesis Table (List View)</li>
                                 </ul>
-                                   <p class="text-xs text-primary dark:text-blue-400 italic">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
+                                <p class="text-xs text-slate-500 font-medium">Toggle between Bar, Line, Pie, Doughnut, and Scatter plots. Use numeric controls to dynamically expand or narrow your top author datasets.</p>
                             </div>
                         </div>
                         <div class="w-full lg:w-1/2">
@@ -1558,7 +1520,6 @@ C7  - [Sample & Data Scope]`;
                                     <li>• <strong>Q-Rank:</strong> Flexibly toggle these overlay features ON or OFF globally.</li>
                                 </ul>
                                 
-                                <!-- Notice the 'mt-4' added to the class list to create space -->
                                 <p class="text-xs text-primary dark:text-blue-400 italic mt-4">
                                     Turn ON or OFF on the two toggles to preview the features.
                                 </p>
@@ -1691,10 +1652,10 @@ C7  - [Sample & Data Scope]`;
                                 </div>
                                 <div class="flex flex-col gap-3 w-full max-w-xs">
                                     <button id="btn-copy-single" onclick="window.copyAIPrompt('single')" class="bg-blue-600 text-white text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-sm font-semibold">
-                                        <span></span> Copy Single Prompt
+                                        <span>📋</span> Copy Single Prompt
                                     </button>
-                                    <button id="btn-copy-batch" onclick="window.copyAIPrompt('batch')" class="bg-blue-600 text-white text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-sm font-semibold">
-                                        <span></span> Copy Batch Prompt
+                                    <button id="btn-copy-batch" onclick="window.copyAIPrompt('batch')" class="bg-slate-700 text-white text-sm px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-slate-600 transition shadow-sm font-semibold">
+                                        <span>📚</span> Copy Batch Prompt
                                     </button>
                                 </div>
                             </div>
@@ -1759,6 +1720,7 @@ C7  - [Sample & Data Scope]`;
                     </div>
 
                     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                        <!-- 1. Getting Started -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -1770,6 +1732,7 @@ C7  - [Sample & Data Scope]`;
                             </ul>
                         </div>
                         
+                        <!-- 2. Library Setting Group -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
@@ -1782,6 +1745,7 @@ C7  - [Sample & Data Scope]`;
                             </ul>
                         </div>
                         
+                        <!-- 3. Appearance -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
@@ -1796,6 +1760,7 @@ C7  - [Sample & Data Scope]`;
                             </ul>
                         </div>
                         
+                        <!-- 4. Space & Indent -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
@@ -1808,6 +1773,7 @@ C7  - [Sample & Data Scope]`;
                             </ul>
                         </div>
                         
+                        <!-- 5. Font & Style -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
@@ -1820,6 +1786,7 @@ C7  - [Sample & Data Scope]`;
                             </ul>
                         </div>
                         
+                        <!-- 6. Citation & Hyperlink -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
@@ -1835,8 +1802,9 @@ C7  - [Sample & Data Scope]`;
                     </div>
 
                     <div class="grid md:grid-cols-2 gap-8 mb-16">
+                        <!-- 7. Save As PDF -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
-                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
+                             <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             </div>
                             <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">7. Save As PDF</h3>
@@ -1845,6 +1813,7 @@ C7  - [Sample & Data Scope]`;
                             </p>
                         </div>
                         
+                        <!-- 8. Right-Click Menu -->
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                              <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
@@ -1859,7 +1828,6 @@ C7  - [Sample & Data Scope]`;
                         </div>
                     </div>
 
-                    <!-- Feature 10: Word Add-in Shortcuts -->
                     <!-- Feature 10: Word Add-in Shortcuts -->
                     <div id="addin-shortcuts" class="scroll-mt-24 max-w-4xl mx-auto">
                         <div class="bg-gradient-to-br from-blue-50/50 via-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 border-t-4 border-t-primary border-x border-b border-gray-200 dark:border-slate-700 shadow-md transition-colors duration-300">
@@ -1885,7 +1853,7 @@ C7  - [Sample & Data Scope]`;
                                     <!-- Emerald -->
                                     <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-slate-950 border border-emerald-200 dark:border-emerald-800/60 px-2 py-1 rounded text-xs shadow-sm">Alt + S</code>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Format: (Author, year)</span>
                                     <!-- Pink -->
                                     <code class="font-mono text-pink-600 dark:text-pink-400 font-bold bg-white dark:bg-slate-950 border border-pink-200 dark:border-pink-800/60 px-2 py-1 rounded text-xs shadow-sm">Alt + X</code>
@@ -2053,10 +2021,10 @@ C7  - [Sample & Data Scope]`;
                         
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
                             <!-- Direct Download Links -->
-                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.exe" download class="bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.exe" target="_blank" rel="noopener noreferrer" class="bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
                                 <span>⬇️</span> Download Installer (.exe)
                             </a>
-                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.zip" download class="bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-600 text-slate-700 dark:text-gray-200 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-slate-500 transition shadow-sm flex items-center justify-center gap-2">
+                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.zip" target="_blank" rel="noopener noreferrer" class="bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-600 text-slate-700 dark:text-gray-200 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-slate-500 transition shadow-sm flex items-center justify-center gap-2">
                                 <span>📦</span> Download Portable (.zip)
                             </a>
                         </div>
