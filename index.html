@@ -6,6 +6,8 @@
     <!-- NEW: Prevents mobile browsers from forcing their own auto-dark mode -->
     <meta name="color-scheme" content="light dark">
     <title>Literature Matrix | Academic Reference & Citation Manager</title>
+    <!-- NEW: Browser Tab Favicon -->
+    <link rel="icon" type="image/x-icon" href="library.ico">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ECharts for Live Previews -->
@@ -1774,37 +1776,66 @@ C7  - [Sample & Data Scope]`;
                     <div id="app-shortcuts" class="mb-16 scroll-mt-24">
                         <div class="bg-gradient-to-br from-blue-50/50 via-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 border-t-4 border-t-primary border-x border-b border-gray-200 dark:border-slate-700 shadow-md max-w-4xl mx-auto transition-colors duration-300">
                             <div class="flex items-center justify-center gap-2 mb-1">
-                                <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-primary dark:text-blue-300 rounded-full">Keyboard Reference</span>
+                                <span class="text-xs font-bold uppercase mb-2 tracking-wider px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-primary dark:text-blue-300 rounded-full">Keyboard Reference</span>
                             </div>
-                            <h3 class="text-2xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">9. Main Application Shortcuts</h3>
+                            <h3 class="text-2xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">Main Application Shortcuts</h3>
                             <p class="text-gray-500 dark:text-slate-400 text-center text-sm mb-6">Work faster with these global hotkeys in the Literature Matrix UI.</p>
                             
-                            <div class="grid sm:grid-cols-2 gap-4">
+                            <div class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Create New Library</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + N</code>
+                                </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Add Literature</span>
                                     <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + L</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Open Library</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + O</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Edit Literature</span>
                                     <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + E</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Open Library in Window Explorer</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + P</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Copy Citation <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
                                     <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + C</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
-                                    <span class="text-sm text-gray-700 dark:text-slate-300">Export Literature <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Import References</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + I</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Export References <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
                                     <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + S</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Save As</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + Shift + S</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Export Entire Matrix to Excel</span>
                                     <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + X</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Backup as Zip</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + B</code>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Delete Row <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
                                     <code class="font-mono text-red-500 dark:text-red-400 font-bold bg-white dark:bg-slate-950 border border-red-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Del</code>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2">
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2 md:col-span-1">
+                                    <span class="text-sm text-gray-700 dark:text-slate-300">Exit</span>
+                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + W</code>
+                                </div>
+                                
+                                <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2 mt-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Open Visualizers</span>
                                     <div class="flex gap-2">
                                         <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-slate-950 border border-emerald-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + M (Mindmap)</code>
@@ -1827,12 +1858,12 @@ C7  - [Sample & Data Scope]`;
                         <p class="text-gray-600 dark:text-gray-400">Everything you need to write, cite, and format directly within Microsoft Word.</p>
                     </div>
 
-                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 flex flex-col shadow-sm">
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Getting Started</h3>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">1. Getting Started</h3>
                             <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
                                 <li><strong class="text-slate-900 dark:text-white">• Open Literature Matrix:</strong> Launches main application to manage master database.</li>
                                 <li><strong class="text-slate-900 dark:text-white">• Help:</strong> Opens this user guide.</li>
@@ -1843,7 +1874,7 @@ C7  - [Sample & Data Scope]`;
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Library Setting Group</h3>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">2. Library Setting Group</h3>
                             <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
                                 <li><strong class="text-slate-900 dark:text-white">• Current Library:</strong> Dropdown to switch active database files.</li>
                                 <li><strong class="text-slate-900 dark:text-white">• Open/Switch Library:</strong> Manually browse & select database files.</li>
@@ -1855,7 +1886,7 @@ C7  - [Sample & Data Scope]`;
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Appearance</h3>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">3. Appearance</h3>
                             <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
                                 <li><strong class="text-slate-900 dark:text-white">• Themes:</strong> Light, Dark, Blue, Emerald, Sunset.</li>
                                 <li><strong class="text-slate-900 dark:text-white">• Transparent Overlay:</strong> 50%, 75%, 95%, 100%.</li>
@@ -1869,7 +1900,7 @@ C7  - [Sample & Data Scope]`;
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Space & Indent</h3>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">4. Space & Indent</h3>
                             <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
                                 <li><strong class="text-slate-900 dark:text-white">• Paragraph Spacing:</strong> Single, 1.5, Double, At least, Exactly, Multiple.</li>
                                 <li><strong class="text-slate-900 dark:text-white">• Special Indents:</strong> None, First line, or Hanging indents.</li>
@@ -1881,7 +1912,7 @@ C7  - [Sample & Data Scope]`;
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Font & Style</h3>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">5. Font & Style</h3>
                             <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
                                 <li><strong class="text-slate-900 dark:text-white">• Font & Size:</strong> Custom font face and point sizes for bibliography.</li>
                                 <li><strong class="text-slate-900 dark:text-white">• Heading Title:</strong> "None", "Bibliography", "References", "Works Cited".</li>
@@ -1893,7 +1924,7 @@ C7  - [Sample & Data Scope]`;
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-primary dark:text-blue-400 rounded-lg flex items-center justify-center mb-4 shrink-0">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                             </div>
-                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Citation & Hyperlink</h3>
+                            <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">6. Citation & Hyperlink</h3>
                             <ul class="text-gray-600 dark:text-gray-300 text-sm space-y-2 flex-grow">
                                 <li><strong class="text-slate-900 dark:text-white">• Styles:</strong> APA, MLA, Chicago, Harvard, Vancouver.</li>
                                 <li><strong class="text-slate-900 dark:text-white">• Format:</strong> Author (year) or (Author, year).</li>
@@ -1929,13 +1960,12 @@ C7  - [Sample & Data Scope]`;
                     </div>
 
                     <!-- Feature 10: Word Add-in Shortcuts -->
-                    <!-- Feature 10: Word Add-in Shortcuts -->
                     <div id="addin-shortcuts" class="scroll-mt-24 max-w-4xl mx-auto">
                         <div class="bg-gradient-to-br from-blue-50/50 via-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-8 border-t-4 border-t-primary border-x border-b border-gray-200 dark:border-slate-700 shadow-md transition-colors duration-300">
                             <div class="flex items-center justify-center gap-2 mb-1">
-                                <span class="text-xs font-bold uppercase tracking-wider px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-primary dark:text-blue-300 rounded-full">Word Ribbon Hotkeys</span>
+                                <span class="text-xs font-bold uppercase mb-2 tracking-wider px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-primary dark:text-blue-300 rounded-full">Word Ribbon Hotkeys</span>
                             </div>
-                            <h3 class="text-2xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">10. Word Add-in Shortcuts at a Glance</h3>
+                            <h3 class="text-2xl font-extrabold mb-2 text-center text-slate-900 dark:text-white">Word Add-in Shortcuts</h3>
                             <p class="text-gray-500 dark:text-slate-400 text-center text-sm mb-6">Speed up document citations directly inside Microsoft Word.</p>
                             
                             <div class="grid sm:grid-cols-2 gap-4">
