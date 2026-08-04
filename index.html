@@ -968,61 +968,70 @@ C7  - [Sample & Data Scope]`;
         };
 
        // --- STANDARD GLOBAL PAYMENT FLOWS ---
-
+// --- Overseas PayPal Flow ---
         window.processPayPalPayment = function() {
             const btn = document.getElementById('btn-submit-paypal');
-            btn.innerHTML = '⏳ Connecting to PayPal...';
+            btn.innerHTML = '⏳ Redirecting to PayPal...';
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
 
+            const numericPrice = selectedPrice.replace(/[^0-9.]/g, ''); 
+            const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=Kimaun78@gmail.com&currency_code=USD&amount=${numericPrice}&item_name=Literature+Matrix+License+-+${encodeURIComponent(selectedPlan)}`;
+
             setTimeout(() => {
-                const numericPrice = selectedPrice.replace(/[^0-9.]/g, ''); 
-                const paypalURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=Kimaun78@gmail.com&currency_code=USD&amount=${numericPrice}&item_name=Literature+Matrix+License+-+${encodeURIComponent(selectedPlan)}`;
+                // Actively redirect the user to PayPal in a new tab
                 window.open(paypalURL, '_blank');
-                
-                // Show inline message instead of alert
+
                 const feedbackEl = document.getElementById('paypal-feedback');
                 if(feedbackEl) {
                     feedbackEl.innerHTML = `
                         <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left text-sm mt-4 shadow-sm">
-                            <p class="mb-2 text-slate-800 dark:text-slate-200">Secure PayPal checkout opened in a new tab.</p>
-                            <p class="font-bold text-slate-900 dark:text-white">Next Step:</p>
-                            <p class="text-slate-700 dark:text-slate-300">After payment, send your receipt to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> to receive your License Key instantly.</p>
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">✓ PayPal Checkout Launched</p>
+                            <p class="text-slate-700 dark:text-slate-300 mb-3">If the payment tab didn't open automatically, <a href="${paypalURL}" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">click here to proceed to PayPal</a>.</p>
+                            
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">Next Step:</p>
+                            <p class="text-slate-700 dark:text-slate-300">Once paid, send your receipt to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
                         </div>
                     `;
                     feedbackEl.classList.remove('hidden');
                 }
                 
-                btn.innerHTML = '🗹 Checkout Opened';
-            }, 1000);
+                btn.innerHTML = '🗹 Redirected to PayPal';
+            }, 800);
         };
 
+        // --- TEMPORARY Overseas Visa / Mastercard Flow (via PayPal Guest Checkout) ---
         window.processCardPayment = function() {
             const btn = document.getElementById('btn-submit-cc');
-            btn.innerHTML = '⏳ Redirecting to Secure Checkout...';
+            btn.innerHTML = '⏳ Redirecting to Secure Gateway...';
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
 
             setTimeout(() => {
                 const numericPrice = selectedPrice.replace(/[^0-9.]/g, ''); 
-                const visaURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=Kimaun78@gmail.com&currency_code=USD&amount=${numericPrice}&item_name=Literature+Matrix+License+-+${encodeURIComponent(selectedPlan)}`;
-                window.open(visaURL, '_blank');
+                
+                // Temporary fallback using PayPal to process Visa/MC until ABA unlocks the feature
+                const fallbackCardURL = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=Kimaun78@gmail.com&currency_code=USD&amount=${numericPrice}&item_name=Literature+Matrix+License+-+${encodeURIComponent(selectedPlan)}`;
 
-                // Show inline message instead of alert
+                // Actively redirect the user to the Visa/Mastercard gateway in a new tab
+                window.open(fallbackCardURL, '_blank');
+
                 const feedbackEl = document.getElementById('cc-feedback');
                 if(feedbackEl) {
                     feedbackEl.innerHTML = `
                         <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left text-sm mt-4 shadow-sm">
-                            <p class="mb-2 text-slate-800 dark:text-slate-200">You are being redirected to our secure gateway (processed via PayPal). You can use your Visa or Mastercard <strong>without</strong> creating an account.</p>
-                            <p class="font-bold text-slate-900 dark:text-white">Next Step:</p>
-                            <p class="text-slate-700 dark:text-slate-300">After payment, send us your receipt on <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> to receive your License Key instantly.</p>
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">✓ Secure Card Checkout Launched</p>
+                            <p class="text-slate-700 dark:text-slate-300 mb-3">If the checkout window was blocked by your browser, <a href="${fallbackCardURL}" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">click here to open the Secure Gateway</a>.</p>
+                            
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">Next Step:</p>
+                            <p class="text-slate-700 dark:text-slate-300">Once paid, send your receipt to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
                         </div>
                     `;
                     feedbackEl.classList.remove('hidden');
                 }
 
-                btn.innerHTML = '🗹 Checkout Opened';
-            }, 1000);
+                btn.innerHTML = '🗹 Gateway Reached';
+            }, 800);
         };
 
         window.processCryptoPayment = function() {
@@ -1038,11 +1047,10 @@ C7  - [Sample & Data Scope]`;
                     feedbackEl.innerHTML = `
                         <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 text-left text-sm mt-4 shadow-sm">
                             <p class="font-bold text-slate-900 dark:text-white mb-2">Binance Payment Instructions:</p>
-                            <p class="mb-2 text-slate-700 dark:text-slate-300">Please send exactly <strong>${selectedPrice}</strong> to our account:</p>
+                            <p class="mb-3 text-slate-700 dark:text-slate-300">Please scan the QR code to send exactly <strong>${selectedPrice}</strong>:</p>
                             
-                            <div class="bg-white dark:bg-slate-900 p-3 rounded border border-gray-200 dark:border-slate-700 font-mono text-xs mb-3 text-slate-800 dark:text-slate-200 select-all">
-                                Pay ID: <strong>[YOUR PAY ID HERE]</strong><br><br>
-                                USDT (TRC20): <strong>[YOUR WALLET HERE]</strong>
+                            <div class="text-center w-full mb-4">
+                                <img src="image_d9843e.png" alt="Binance QR Code" class="w-48 h-auto mx-auto rounded-xl border border-amber-200 dark:border-amber-700 shadow-sm bg-white p-1">
                             </div>
                             
                             <p class="text-slate-700 dark:text-slate-300">Once transferred, send your screenshot to <a href="https://t.me/Kimaun" target="_blank" class="text-[#0088cc] dark:text-[#33a8e5] font-bold hover:underline">Telegram</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-[#0088cc] dark:text-[#33a8e5] font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
@@ -1055,22 +1063,47 @@ C7  - [Sample & Data Scope]`;
             }, 1000);
         };
 
+       // --- Local ABA PayWay Flow (Replaces static QR) ---
         window.processABAPayment = function() {
             const btn = document.getElementById('btn-submit-aba');
-            btn.innerHTML = '🗹 Instructions Ready';
+            btn.innerHTML = '⏳ Redirecting to ABA PayWay...';
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
 
-            const feedbackEl = document.getElementById('aba-feedback');
-            if(feedbackEl) {
-                feedbackEl.innerHTML = `
-                    <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left text-sm mt-2 shadow-sm">
-                        <p class="font-bold text-slate-900 dark:text-white">Next Step:</p>
-                        <p class="text-slate-700 dark:text-slate-300">Please send your successful transfer screenshot to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
-                    </div>
-                `;
-                feedbackEl.classList.remove('hidden');
-            }
+            setTimeout(() => {
+                // Route to the correct ABA PayWay Link based on the selected plan
+                let abaPayWayURL = "";
+                if (selectedPlan === "1 Month") {
+                    abaPayWayURL = "https://link.payway.com.kh/ABAPAYZ94935691";
+                } else if (selectedPlan === "3 Months") {
+                    abaPayWayURL = "https://link.payway.com.kh/ABAPAY5g493571N";
+                } else if (selectedPlan === "6 Months") {
+                    abaPayWayURL = "https://link.payway.com.kh/ABAPAY0B493573F";
+                } else if (selectedPlan === "1 Year") {
+                    abaPayWayURL = "https://link.payway.com.kh/ABAPAYGd493574b";
+                } else if (selectedPlan === "Lifetime") {
+                    abaPayWayURL = "https://link.payway.com.kh/ABAPAYMY493576Q";
+                }
+
+                // Actively redirect the user to the ABA PayWay gateway in a new tab
+                window.open(abaPayWayURL, '_blank');
+
+                const feedbackEl = document.getElementById('aba-feedback');
+                if(feedbackEl) {
+                    feedbackEl.innerHTML = `
+                        <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left text-sm mt-4 shadow-sm">
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">✓ ABA PayWay Launched</p>
+                            <p class="text-slate-700 dark:text-slate-300 mb-3">If the checkout window was blocked by your browser, <a href="${abaPayWayURL}" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">click here to open ABA PayWay</a>.</p>
+                            
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">Next Step:</p>
+                            <p class="text-slate-700 dark:text-slate-300">Once paid, send your successful transfer screenshot to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
+                        </div>
+                    `;
+                    feedbackEl.classList.remove('hidden');
+                }
+
+                btn.innerHTML = '🗹 Gateway Reached';
+            }, 800);
         };
 
         // --- Interactive Feature 6 Browser Mockup Toggles ---
@@ -1160,7 +1193,7 @@ C7  - [Sample & Data Scope]`;
                 
                 <button onclick="switchPage('page-home', 'word-addin')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</button>
                 <button onclick="switchPage('page-pricing')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</button>
-                <button onclick="switchPage('page-tutorials')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Tutorials</button>
+                <!-- <button onclick="switchPage('page-tutorials')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Tutorials</button> -->
                 <button onclick="switchPage('page-download')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Download</button>
                 <button onclick="switchPage('page-contact')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Contact</button>
                 
@@ -1178,7 +1211,7 @@ C7  - [Sample & Data Scope]`;
                 
                 <button onclick="switchPage('page-home', 'word-addin')" class="text-left hover:text-primary dark:hover:text-blue-400">Word Add-In</button>
                 <button onclick="switchPage('page-pricing')" class="text-left hover:text-primary dark:hover:text-blue-400">Pricing</button>
-                <button onclick="switchPage('page-tutorials')" class="text-left hover:text-primary dark:hover:text-blue-400">Tutorials</button>
+                <!-- <button onclick="switchPage('page-tutorials')" class="text-left hover:text-primary dark:hover:text-blue-400">Tutorials</button> -->
                 <button onclick="switchPage('page-download')" class="text-left hover:text-primary dark:hover:text-blue-400">Download & Update</button>
                 <button onclick="switchPage('page-contact')" class="text-left hover:text-primary dark:hover:text-blue-400">Contact Us</button>
                 <div class="pt-2 border-t border-gray-100 dark:border-slate-800">
@@ -2217,18 +2250,19 @@ C7  - [Sample & Data Scope]`;
                 </button>
             </div>
 
-            <!-- ABA View -->
+            <!-- ABA View (Now using PayWay Dynamic Links) -->
             <div id="payment-aba" class="hidden p-6 space-y-6 flex-col items-center text-center overflow-y-auto">
-                <p class="text-sm text-gray-600 dark:text-gray-400">Scan this QR code using your ABA Mobile app to complete the payment for <strong class="text-slate-900 dark:text-white" id="aba-amount"></strong>.</p>
-                <div class="bg-white p-2 rounded-xl shadow-sm border border-gray-200 inline-block">
-                    <img src="image_838a39.jpg" alt="ABA QR Code" class="w-48 h-auto mx-auto rounded-lg">
+                <div class="w-16 h-16 bg-[#005f73] rounded-full flex items-center justify-center text-white mx-auto shadow-md mb-2">
+                    <span class="font-bold">ABA</span>
                 </div>
+                <h4 class="text-lg font-bold text-slate-900 dark:text-white">Pay via ABA PayWay</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400">You will be redirected to the secure ABA PayWay portal to complete your payment of <strong class="text-slate-900 dark:text-white" id="aba-amount"></strong> using KHQR.</p>
                 
-                <button id="btn-submit-aba" type="button" onclick="processABAPayment()" class="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">
-                    I have paid, send receipt
+                <button id="btn-submit-aba" type="button" onclick="processABAPayment()" class="w-full bg-[#005f73] text-white py-3 rounded-lg font-bold hover:bg-[#004a5a] transition shadow-md">
+                    Open ABA Checkout
                 </button>
                 
-                <!-- NEW: ABA Feedback Container -->
+                <!-- ABA Feedback Container -->
                 <div id="aba-feedback" class="hidden w-full text-left"></div>
 
                 <button type="button" onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline mt-2">← Back to methods</button>
@@ -2302,7 +2336,7 @@ C7  - [Sample & Data Scope]`;
             <div class="flex justify-center space-x-6 mb-8 text-sm">
                 <button onclick="switchPage('page-home')" class="hover:text-white transition">Home</button>
                 <button onclick="switchPage('page-pricing')" class="hover:text-white transition">Pricing</button>
-                <button onclick="switchPage('page-tutorials')" class="hover:text-white transition">Tutorials</button>
+                <!-- <button onclick="switchPage('page-tutorials')" class="hover:text-white transition">Tutorials</button> -->
                 <button onclick="switchPage('page-download')" class="hover:text-white transition">Download</button>
                 <button onclick="switchPage('page-contact')" class="hover:text-white transition">Contact</button>
             </div>
