@@ -295,6 +295,186 @@
             }
         }
 
+        // --- Automated Promo & Pricing Engine ---
+        let isPromoActive = false;
+        
+        // Master pricing and link database
+        const plansData = {
+            '1 Month': { original: 10, promo: 7.00, abaLink: 'https://link.payway.com.kh/ABAPAYZ94935691' },
+            '3 Months': { original: 25, promo: 17.50, abaLink: 'https://link.payway.com.kh/ABAPAY5g493571N' },
+            '6 Months': { original: 45, promo: 31.50, abaLink: 'https://link.payway.com.kh/ABAPAY0B493573F' },
+            '1 Year': { original: 85, promo: 59.50, abaLink: 'https://link.payway.com.kh/ABAPAYGd493574b' },
+            'Lifetime': { original: 135, promo: 94.50, abaLink: 'https://link.payway.com.kh/ABAPAYMY493576Q' }
+        };
+
+        function formatPrice(num) {
+            return Number.isInteger(num) ? `$${num}` : `$${num.toFixed(2)}`;
+        }
+
+        function initPromoCountdown() {
+            // 🛑 MATE: To restart the 7-day promotion in the future, just change this text!
+            // E.g., change "promo_1" to "promo_2" or "black_friday". 
+            // This forces a brand new 7-day timer for all visitors.
+
+            // 1. Change the campaign name so browsers forget the old timer
+            // const campaignName = "promo_over";
+            const campaignName = "promo_2"; 
+            
+            const storageKey = "promoEndDateLM_" + campaignName;
+            let endDate = localStorage.getItem(storageKey);
+            
+            if (!endDate) {
+                const d = new Date();
+                
+                // 2. Change the plus to a MINUS so the timer is instantly in the past
+                // d.setDate(d.getDate() - 1);
+                d.setDate(d.getDate() + 8); // Starts a fresh 7-day timer
+
+
+                endDate = d.getTime();
+                localStorage.setItem(storageKey, endDate);
+            }
+            
+            const updatePricingUI = (active) => {
+                isPromoActive = active;
+                
+                // Toggle Pricing Page Banner
+                const banner = document.getElementById('promo-banner');
+                if (banner) banner.style.display = active ? 'flex' : 'none';
+
+                // Toggle Big Home Banner
+                const homeBanner = document.getElementById('home-promo-banner');
+                if (homeBanner) homeBanner.style.display = active ? 'flex' : 'none';
+
+                // Toggle ABA Modal Views
+                const abaPromoView = document.getElementById('aba-promo-view');
+                const abaStandardView = document.getElementById('aba-standard-view');
+                if(abaPromoView && abaStandardView) {
+                    abaPromoView.classList.toggle('hidden', !active);
+                    abaStandardView.classList.toggle('hidden', active);
+                }
+
+                // Force scroll check immediately to make sure the nav badge matches
+                if (typeof window.checkPromoScroll === 'function') window.checkPromoScroll();
+
+                // Update Grid Cards Automatically
+                Object.keys(plansData).forEach(plan => {
+                    const safeId = plan.replace(/\s+/g, '-').toLowerCase();
+                    const priceContainer = document.getElementById(`price-container-${safeId}`);
+                    const btn = document.getElementById(`btn-${safeId}`);
+                    
+                    if (!priceContainer || !btn) return;
+
+                    const pData = plansData[plan];
+                    const origStr = formatPrice(pData.original);
+                    const promoStr = formatPrice(pData.promo);
+
+                    if (active) {
+                        // Render Discount UI
+                        priceContainer.innerHTML = `
+                            <div class="mb-4 flex items-center justify-center">
+                                <span class="text-gray-400 line-through text-lg font-bold mr-2">${origStr}</span>
+                                <span class="text-4xl font-extrabold text-red-500">${promoStr}</span>
+                            </div>`;
+                        btn.setAttribute('onclick', `openPaymentModal('${plan}', '${promoStr}')`);
+                    } else {
+                        // Render Standard UI
+                        const colorClass = plan === 'Lifetime' ? 'text-white' : 'text-primary dark:text-blue-400';
+                        priceContainer.innerHTML = `<div class="text-3xl font-extrabold ${colorClass} mb-4">${origStr}</div>`;
+                        btn.setAttribute('onclick', `openPaymentModal('${plan}', '${origStr}')`);
+                    }
+                });
+            };
+
+            const timer = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = endDate - now;
+                
+                if (distance < 0) {
+                    clearInterval(timer);
+                    updatePricingUI(false); // Timer is dead -> Revert to Original
+                    return;
+                }
+                
+                updatePricingUI(true); // Timer is alive -> Show Promo
+                
+                const dEl = document.getElementById('cd-days');
+                const hEl = document.getElementById('cd-hours');
+                const mEl = document.getElementById('cd-mins');
+                const sEl = document.getElementById('cd-secs');
+
+                if(dEl) dEl.innerText = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, '0');
+                if(hEl) hEl.innerText = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                if(mEl) mEl.innerText = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                if(sEl) sEl.innerText = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+            }, 1000);
+        }
+
+        // --- Smart Scroll Listener for Nav Banner ---
+        window.checkPromoScroll = function() {
+            const navBadge = document.getElementById('nav-promo-badge');
+            if (!navBadge) return;
+            
+            // Only show the tiny nav badge if the promo is active AND the user has scrolled past the big banner (150px)
+            if (isPromoActive && window.scrollY > 150) {
+                navBadge.style.display = 'flex';
+            } else {
+                navBadge.style.display = 'none';
+            }
+        };
+
+        window.addEventListener('scroll', window.checkPromoScroll);
+
+        // Make sure to call this when the page loads!
+        window.addEventListener('DOMContentLoaded', () => {
+            initPromoCountdown(); 
+        });
+
+        // --- Smart ABA Gateway Toggle ---
+        window.processABAPayment = function() {
+            // Determine which view is active to update the correct button
+            const isPromo = isPromoActive; 
+            const btnId = isPromo ? 'btn-submit-aba-promo' : 'btn-submit-aba-standard';
+            const feedbackId = isPromo ? 'aba-feedback-promo' : 'aba-feedback-standard';
+            
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.innerHTML = '⏳ Redirecting to ABA PayWay...';
+                btn.disabled = true;
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+            }
+
+            setTimeout(() => {
+                let abaPayWayURL = "";
+                
+                if (isPromo) {
+                    // Use the single promotion link
+                    abaPayWayURL = "https://pay.ababank.com/oRF8/mv2iq4eh";
+                } else {
+                    // Use the specific 5-tier standard links
+                    abaPayWayURL = plansData[selectedPlan].abaLink;
+                }
+
+                // Actively redirect the user to the ABA PayWay gateway in a new tab
+                window.open(abaPayWayURL, '_blank');
+
+                const feedbackEl = document.getElementById(feedbackId);
+                if(feedbackEl) {
+                    feedbackEl.innerHTML = `
+                        <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left text-sm mt-4 shadow-sm">
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">✓ ABA PayWay Launched</p>
+                            <p class="text-slate-700 dark:text-slate-300 mb-3">If the checkout window was blocked by your browser, <a href="${abaPayWayURL}" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">click here to open ABA PayWay</a>.</p>
+                            <p class="font-bold text-slate-900 dark:text-white mb-1">Next Step:</p>
+                            <p class="text-slate-700 dark:text-slate-300">Once paid, send your successful transfer screenshot to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
+                        </div>
+                    `;
+                    feedbackEl.classList.remove('hidden');
+                }
+                
+                if (btn) btn.innerHTML = '🗹 Gateway Reached';
+            }, 800);
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initLivePreviews();
@@ -925,31 +1105,30 @@ C7  - [Sample & Data Scope]`;
         let selectedPrice = '';
 
         window.openPaymentModal = function(planName, priceStr) {
-        selectedPlan = planName;
-        selectedPrice = priceStr;
-        
-        // Safely update elements using optional chaining (?.)
-        const modalTitle = document.getElementById('modal-title');
-        if (modalTitle) modalTitle.innerText = `Select Payment Method for ${planName}`;
-        
-        const abaEl = document.getElementById('aba-amount');
-        if (abaEl) abaEl.innerText = priceStr;
+            selectedPlan = planName;
+            selectedPrice = priceStr;
+            
+            const modalTitle = document.getElementById('modal-title');
+            if (modalTitle) modalTitle.innerText = `Select Payment Method for ${planName}`;
+            
+            // Fix: Updates the price text dynamically in BOTH ABA views
+            document.querySelectorAll('.aba-amount').forEach(el => el.innerText = priceStr);
 
-        const paypalEl = document.getElementById('paypal-amount');
-        if (paypalEl) paypalEl.innerText = priceStr;
+            const paypalEl = document.getElementById('paypal-amount');
+            if (paypalEl) paypalEl.innerText = priceStr;
 
-        const ccEl = document.getElementById('cc-amount');
-        if (ccEl) ccEl.innerText = priceStr;
+            const ccEl = document.getElementById('cc-amount');
+            if (ccEl) ccEl.innerText = priceStr;
 
-        const btcEl = document.getElementById('btc-amount');
-        if (btcEl) btcEl.innerText = priceStr;
+            const btcEl = document.getElementById('btc-amount');
+            if (btcEl) btcEl.innerText = priceStr;
 
-        // Show the modal
-        const modal = document.getElementById('payment-modal');
-        if (modal) modal.classList.remove('hidden');
-        
-        showPaymentSelection();
-    };
+            // Show the modal
+            const modal = document.getElementById('payment-modal');
+            if (modal) modal.classList.remove('hidden');
+            
+            showPaymentSelection();
+        };
 
         window.closePaymentModal = function() {
             document.getElementById('payment-modal').classList.add('hidden');
@@ -1065,49 +1244,6 @@ C7  - [Sample & Data Scope]`;
             }, 1000);
         };
 
-       // --- Local ABA PayWay Flow (Replaces static QR) ---
-        window.processABAPayment = function() {
-            const btn = document.getElementById('btn-submit-aba');
-            btn.innerHTML = '⏳ Redirecting to ABA PayWay...';
-            btn.disabled = true;
-            btn.classList.add('opacity-75', 'cursor-not-allowed');
-
-            setTimeout(() => {
-                // Route to the correct ABA PayWay Link based on the selected plan
-                let abaPayWayURL = "";
-                if (selectedPlan === "1 Month") {
-                    abaPayWayURL = "https://link.payway.com.kh/ABAPAYZ94935691";
-                } else if (selectedPlan === "3 Months") {
-                    abaPayWayURL = "https://link.payway.com.kh/ABAPAY5g493571N";
-                } else if (selectedPlan === "6 Months") {
-                    abaPayWayURL = "https://link.payway.com.kh/ABAPAY0B493573F";
-                } else if (selectedPlan === "1 Year") {
-                    abaPayWayURL = "https://link.payway.com.kh/ABAPAYGd493574b";
-                } else if (selectedPlan === "Lifetime") {
-                    abaPayWayURL = "https://link.payway.com.kh/ABAPAYMY493576Q";
-                }
-
-                // Actively redirect the user to the ABA PayWay gateway in a new tab
-                window.open(abaPayWayURL, '_blank');
-
-                const feedbackEl = document.getElementById('aba-feedback');
-                if(feedbackEl) {
-                    feedbackEl.innerHTML = `
-                        <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 text-left text-sm mt-4 shadow-sm">
-                            <p class="font-bold text-slate-900 dark:text-white mb-1">✓ ABA PayWay Launched</p>
-                            <p class="text-slate-700 dark:text-slate-300 mb-3">If the checkout window was blocked by your browser, <a href="${abaPayWayURL}" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">click here to open ABA PayWay</a>.</p>
-                            
-                            <p class="font-bold text-slate-900 dark:text-white mb-1">Next Step:</p>
-                            <p class="text-slate-700 dark:text-slate-300">Once paid, send your successful transfer screenshot to <a href="https://t.me/Kimaun" target="_blank" class="text-primary dark:text-blue-400 font-bold hover:underline">Telegram (t.me/Kimaun)</a> or email <a href="mailto:Kimaun78@gmail.com" class="text-primary dark:text-blue-400 font-bold hover:underline">Kimaun78@gmail.com</a> for immediate key delivery.</p>
-                        </div>
-                    `;
-                    feedbackEl.classList.remove('hidden');
-                }
-
-                btn.innerHTML = '🗹 Gateway Reached';
-            }, 800);
-        };
-
         // --- Interactive Feature 6 Browser Mockup Toggles ---
         let mockQRankActive = true;
         let mockSciHubActive = true;
@@ -1170,11 +1306,20 @@ C7  - [Sample & Data Scope]`;
 
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-white/90 dark:bg-darkbg/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 transition-colors duration-300">
-        <div class="container mx-auto px-6 py-4 flex flex-wrap justify-between items-center relative">
-            <a href="#" onclick="switchPage('page-home')" class="flex items-center gap-2 text-2xl font-extrabold text-primary tracking-tight shrink-0">
-                <img src="library.ico" alt="Logo" class="w-8 h-8" onerror="this.style.display='none'">
-                Literature Matrix
-            </a>
+        <div class="container mx-auto px-4 sm:px-6 py-4 flex flex-wrap justify-between items-center relative">
+            
+            <!-- Title + Promo Badge Group -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+                <a href="#" onclick="switchPage('page-home')" class="flex items-center gap-1.5 sm:gap-2 text-xl sm:text-2xl font-extrabold text-primary tracking-tight">
+                    <img src="library.ico" alt="Logo" class="w-7 h-7 sm:w-8 sm:h-8" onerror="this.style.display='none'">
+                    <span class="hidden sm:inline">Literature Matrix</span>
+                </a>
+                
+                <!-- NEW: Compact Promo Badge (Pinned to Title) -->
+                <div id="nav-promo-badge" style="display: none;" onclick="switchPage('page-pricing')" class="cursor-pointer bg-gradient-to-r from-red-500 to-rose-600 text-white px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold shadow-sm hover:shadow hover:scale-105 transition-all items-center gap-1 border border-red-400/50 whitespace-nowrap">
+                    <span>🎁 30% OFF</span>
+                </div>
+            </div>
             
             <!-- Mobile Controls -->
             <div class="flex items-center gap-4 lg:hidden">
@@ -1233,6 +1378,25 @@ C7  - [Sample & Data Scope]`;
             
             <!-- Hero Section -->
             <header class="container mx-auto px-6 pt-16 pb-20 text-center">
+
+                <!-- === Auto-Hiding Home Promo Banner === -->
+                <div id="home-promo-banner" style="display: none;" onclick="switchPage('page-pricing')" class="max-w-3xl mx-auto bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl p-4 shadow-lg mb-8 cursor-pointer hover:shadow-xl hover:scale-[1.02] transition-all flex-col sm:flex-row items-center justify-between gap-4 border border-red-400 relative overflow-hidden group">
+                    <!-- Shine Effect -->
+                    <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                    
+                    <div class="flex items-center gap-3 relative z-10 mb-3 sm:mb-0">
+                        <span class="text-3xl">🎁</span>
+                        <div class="text-left">
+                            <h4 class="font-extrabold text-lg">Special 30% Discount Active!</h4>
+                            <p class="text-sm opacity-90 text-white">Grab your Literature Matrix license at a massive discount.</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/20 rounded-lg px-5 py-2.5 font-bold text-sm whitespace-nowrap relative z-10 flex items-center gap-2">
+                        Claim Offer <span class="group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                </div>
+                <!-- === End Home Promo Banner === -->
+
                 <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">All-in-One Literature & Citation Tool</span>
                 <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-6 mb-6 text-slate-900 dark:text-white">
                     Master Your References with <span class="text-primary dark:text-blue-400">Literature Matrix</span>
@@ -2006,58 +2170,77 @@ C7  - [Sample & Data Scope]`;
         <!-- ============================================== -->
         <div id="page-pricing" class="page-view hidden min-h-screen pt-16 pb-20 bg-white dark:bg-darkbg transition-colors duration-300">
             <div class="container mx-auto px-6 max-w-6xl">
-                <div class="text-center max-w-3xl mx-auto mb-16">
+                
+                <div class="text-center max-w-3xl mx-auto mb-10">
                     <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-100 text-primary dark:bg-blue-900/30 dark:text-blue-300 uppercase tracking-wider">Simple & Transparent</span>
                     <h2 class="text-3xl md:text-5xl font-extrabold mt-4 mb-4 text-slate-900 dark:text-white">Pricing Plans</h2>
                     <p class="text-gray-600 dark:text-gray-400">Choose the plan that best fits your research needs. All plans include full access to the Desktop App and Word Add-in.</p>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 items-end">
-    <!-- 1 Month -->
-    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition">
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
-        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$10</div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-        <button onclick="openPaymentModal('1 Month', '$10')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
-    </div>
-    
-    <!-- 3 Months -->
-    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $5</div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">3 Months</h3>
-        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$25</div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-        <button onclick="openPaymentModal('3 Months', '$25')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
-    </div>
-    
-    <!-- 6 Months -->
-    <div class="col-span-2 sm:col-span-1 bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular • Save $15</div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
-        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$45</div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-        <button onclick="openPaymentModal('6 Months', '$45')" class="w-full bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
-    </div>
-    
-    <!-- 1 Year -->
-    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $35</div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">1 Year</h3>
-        <div class="text-3xl font-extrabold text-primary dark:text-blue-400 mb-4">$85</div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700">1 Device</p>
-        <button onclick="openPaymentModal('1 Year', '$85')" class="w-full bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
-    </div>
-    
-    <!-- Lifetime -->
-    <div class="col-span-2 sm:col-span-1 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition relative">
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Best Value</div>
-        <div class="text-yellow-400 text-2xl mb-2 mt-2">👑</div>
-        <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
-        <div class="text-3xl font-extrabold text-white mb-4">$135</div>
-        <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700"><strong>4 Devices</strong></p>
-        <button onclick="openPaymentModal('Lifetime', '$135')" class="w-full bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
-    </div>
-</div>
+                <!-- Auto-Hiding Promo Banner -->
+                <div id="promo-banner" style="display: none;" class="max-w-4xl mx-auto bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl p-5 shadow-lg mb-12 flex-col md:flex-row items-center justify-between">
+                    <div class="flex items-center gap-4 mb-4 md:mb-0">
+                        <span class="text-4xl">🎁</span>
+                        <div class="text-left">
+                            <h4 class="font-extrabold text-xl">Special 30% Discount!</h4>
+                            <p class="text-sm opacity-90">Grab your license at a massive discount before the timer ends.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 text-center">
+                        <div class="bg-black/20 rounded-lg px-3 py-2 min-w-[65px]"><span id="cd-days" class="block text-2xl font-bold">00</span><span class="text-[10px] uppercase font-semibold tracking-wider">Days</span></div>
+                        <div class="bg-black/20 rounded-lg px-3 py-2 min-w-[65px]"><span id="cd-hours" class="block text-2xl font-bold">00</span><span class="text-[10px] uppercase font-semibold tracking-wider">Hours</span></div>
+                        <div class="bg-black/20 rounded-lg px-3 py-2 min-w-[65px]"><span id="cd-mins" class="block text-2xl font-bold">00</span><span class="text-[10px] uppercase font-semibold tracking-wider">Mins</span></div>
+                        <div class="bg-black/20 rounded-lg px-3 py-2 min-w-[65px]"><span id="cd-secs" class="block text-2xl font-bold">00</span><span class="text-[10px] uppercase font-semibold tracking-wider">Secs</span></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-stretch lg:items-end">
+                    
+                    <!-- 1 Month -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition flex flex-col">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">1 Month</h3>
+                        <div id="price-container-1-month"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
+                        <button id="btn-1-month" class="w-full mt-auto bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+                    </div>
+                    
+                    <!-- 3 Months -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative flex flex-col">
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $5</div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">3 Months</h3>
+                        <div id="price-container-3-months"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
+                        <button id="btn-3-months" class="w-full mt-auto bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+                    </div>
+                    
+                    <!-- 6 Months -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative flex flex-col">
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular • Save $15</div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
+                        <div id="price-container-6-months"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
+                        <button id="btn-6-months" class="w-full mt-auto bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-md">Get Started</button>
+                    </div>
+                    
+                    <!-- 1 Year -->
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative flex flex-col">
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $35</div>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">1 Year</h3>
+                        <div id="price-container-1-year"></div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
+                        <button id="btn-1-year" class="w-full mt-auto bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-slate-700 dark:text-white px-4 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-slate-600 transition">Get Started</button>
+                    </div>
+                    
+                    <!-- Lifetime -->
+                    <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border border-slate-700 text-center hover:shadow-xl transition relative flex flex-col">
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Best Value</div>
+                        <div class="text-yellow-400 text-2xl mb-2 mt-2">👑</div>
+                        <h3 class="text-xl font-bold text-white mb-2">Lifetime</h3>
+                        <div id="price-container-lifetime"></div>
+                        <p class="text-sm text-slate-300 mb-6 pb-6 border-b border-slate-700 flex-grow"><strong>4 Devices</strong></p>
+                        <button id="btn-lifetime" class="w-full mt-auto bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition shadow-lg">Get Lifetime</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2280,22 +2463,35 @@ C7  - [Sample & Data Scope]`;
                 </button>
             </div>
 
-            <!-- ABA View (Now using PayWay Dynamic Links) -->
-            <div id="payment-aba" class="hidden p-6 space-y-6 flex-col items-center text-center overflow-y-auto">
-                <div class="w-16 h-16 bg-[#005f73] rounded-full flex items-center justify-center text-white mx-auto shadow-md mb-2">
+            <!-- ABA View (Auto-Toggling) -->
+            <div id="payment-aba" class="hidden p-6 flex-col items-center text-center overflow-y-auto">
+                <div class="w-16 h-16 bg-[#005f73] rounded-full flex items-center justify-center text-white mx-auto shadow-md mb-4 mt-2">
                     <span class="font-bold">ABA</span>
                 </div>
-                <h4 class="text-lg font-bold text-slate-900 dark:text-white">Pay via ABA PayWay</h4>
-                <p class="text-sm text-gray-600 dark:text-gray-400">You will be redirected to the secure ABA PayWay portal to complete your payment of <strong class="text-slate-900 dark:text-white" id="aba-amount"></strong> using KHQR.</p>
                 
-                <button id="btn-submit-aba" type="button" onclick="processABAPayment()" class="w-full bg-[#005f73] text-white py-3 rounded-lg font-bold hover:bg-[#004a5a] transition shadow-md">
-                    Open ABA Checkout
-                </button>
-                
-                <!-- ABA Feedback Container -->
-                <div id="aba-feedback" class="hidden w-full text-left"></div>
+                <!-- VIEW 1: Dynamic Promo Link (Visible only when promo is active) -->
+                <div id="aba-promo-view" class="w-full space-y-4 hidden">
+                    <h4 class="text-lg font-bold text-slate-900 dark:text-white">Pay via ABA PayWay</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">You will be redirected to the secure ABA portal. Please manually enter <strong class="text-red-500 text-xl font-extrabold aba-amount"></strong> to claim your discount.</p>
+                    
+                    <button id="btn-submit-aba-promo" type="button" onclick="processABAPayment()" class="w-full bg-[#005f73] text-white py-3 rounded-lg font-bold hover:bg-[#004a5a] transition shadow-md">
+                        Open ABA Checkout
+                    </button>
+                    <div id="aba-feedback-promo" class="hidden w-full text-left"></div>
+                </div>
 
-                <button type="button" onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline mt-2">← Back to methods</button>
+                <!-- VIEW 2: Dynamic Standard Link (Visible only when promo is over) -->
+                <div id="aba-standard-view" class="w-full space-y-4 hidden">
+                    <h4 class="text-lg font-bold text-slate-900 dark:text-white">Pay via ABA PayWay</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">You will be redirected to the secure ABA PayWay portal to complete your payment of <strong class="text-slate-900 dark:text-white aba-amount"></strong> using KHQR.</p>
+                    
+                    <button id="btn-submit-aba-standard" type="button" onclick="processABAPayment()" class="w-full bg-[#005f73] text-white py-3 rounded-lg font-bold hover:bg-[#004a5a] transition shadow-md">
+                        Open ABA Checkout
+                    </button>
+                    <div id="aba-feedback-standard" class="hidden w-full text-left"></div>
+                </div>
+
+                <button type="button" onclick="showPaymentSelection()" class="text-sm text-gray-500 hover:underline mt-6">← Back to methods</button>
             </div>
 
             <!-- PayPal View -->
