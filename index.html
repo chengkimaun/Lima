@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- NEW: Prevents mobile browsers from forcing their own auto-dark mode -->
+    <meta name="color-scheme" content="light dark">
     <title>Literature Matrix | Academic Reference & Citation Manager</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,8 +34,10 @@
             const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDark) {
                 document.documentElement.classList.add('dark');
+                document.documentElement.style.colorScheme = 'dark'; // Blocks mobile auto-inversion
             } else {
                 document.documentElement.classList.remove('dark');
+                document.documentElement.style.colorScheme = 'light'; // Blocks mobile auto-inversion
             }
             updateThemeIcons(isDark);
         }
@@ -50,6 +54,7 @@
             document.documentElement.classList.toggle('dark');
             const isDark = document.documentElement.classList.contains('dark');
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; // Blocks mobile auto-inversion
             updateThemeIcons(isDark);
             
             if(window.mindmapPreview) {
@@ -63,9 +68,11 @@
             if (isDark) {
                 document.documentElement.classList.add('dark');
                 localStorage.setItem('theme', 'dark');
+                document.documentElement.style.colorScheme = 'dark'; // Blocks mobile auto-inversion
             } else {
                 document.documentElement.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
+                document.documentElement.style.colorScheme = 'light'; // Blocks mobile auto-inversion
             }
             updateThemeIcons(isDark);
             
