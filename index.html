@@ -1284,33 +1284,36 @@ C7  - [Sample & Data Scope]`;
             }
         };
 
-        // --- Anti-Inspect & Source Code Protection ---
+        // --- Stronger Anti-Inspect & Source Code Protection ---
         
-        // 1. Block Right-Click Context Menu
-        document.addEventListener('contextmenu', function (e) {
+        // 1. Block Right-Click
+        window.addEventListener('contextmenu', function (e) {
             e.preventDefault();
-        });
+        }, true);
 
-        // 2. Block Keyboard Shortcuts (F12, Ctrl+U, Ctrl+Shift+I/J/C)
-        document.addEventListener('keydown', function (e) {
-            // Block F12
+        // 2. Aggressive Keyboard Block (Using Capture Phase)
+        window.addEventListener('keydown', function (e) {
+            // Block F12 (and Fn+F12)
             if (e.key === 'F12' || e.keyCode === 123) {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
             
-            // Block Ctrl + U (View Source)
-            if (e.ctrlKey && (e.key === 'u' || e.key === 'U')) {
+            // Block Ctrl + U (keyCode 85)
+            if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
 
-            // Block Ctrl + Shift + I / J / C (Developer Tools & Element Inspector)
-            if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I' || e.key === 'j' || e.key === 'J' || e.key === 'c' || e.key === 'C')) {
+            // Block Ctrl + Shift + I / J / C (keyCodes 73, 74, 67)
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
-        });
+        }, true); // 'true' forces this to run before the browser does
 
     </script>
     <style>
