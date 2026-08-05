@@ -496,7 +496,7 @@
                 }
             }
             // -------------------------------------------------
-        });
+        });        
 
         // --- Fetch Changelog Logic ---
         async function fetchChangelog() {
@@ -731,37 +731,51 @@ Version 1.0.0 Release Notes
             const searchInput = document.getElementById('matrix-search');
             const typeFilter = document.getElementById('matrix-type-filter');
             const themeFilter = document.getElementById('matrix-theme-filter');
-            const tableRows = document.querySelectorAll('.matrix-row');
 
             function filterTable() {
+                // Re-query rows dynamically in case they were sorted
+                const tableRows = document.querySelectorAll('.matrix-row');
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedType = typeFilter.value;
                 const selectedTheme = themeFilter.value;
 
                 tableRows.forEach(row => {
-                    const titleCell = row.querySelector('.row-title');
-                    if(!titleCell.getAttribute('data-original')) {
-                        titleCell.setAttribute('data-original', titleCell.innerText);
-                    }
-                    const originalText = titleCell.getAttribute('data-original');
+                    // Grab all 3 data cells in the row (Author, Year, Title)
+                    const cells = row.querySelectorAll('div.truncate'); 
                     
+                    // Backup original text so we don't destroy data when highlighting
+                    cells.forEach(cell => {
+                        if(!cell.getAttribute('data-original')) {
+                            cell.setAttribute('data-original', cell.innerText.trim());
+                        }
+                    });
+
+                    // Combine all original text to check for matches anywhere in the row
+                    const fullRowText = Array.from(cells).map(c => c.getAttribute('data-original')).join(' ').toLowerCase();
+                    
+                    const matchesSearch = fullRowText.includes(searchTerm);
                     const type = row.getAttribute('data-type');
                     const theme = row.getAttribute('data-theme') || 'all';
                     
-                    const matchesSearch = originalText.toLowerCase().includes(searchTerm) || row.innerText.toLowerCase().includes(searchTerm);
                     const matchesType = selectedType === 'all' || type === selectedType;
                     const matchesTheme = selectedTheme === 'all' || theme === selectedTheme;
 
                     if (matchesSearch && matchesType && matchesTheme) {
-                        row.style.display = '';
-                        if (searchTerm.length > 0 && originalText.toLowerCase().includes(searchTerm)) {
-                            const regex = new RegExp(`(${searchTerm})`, 'gi');
-                            titleCell.innerHTML = originalText.replace(regex, `<span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">$1</span>`);
-                        } else {
-                            titleCell.innerHTML = originalText;
-                        }
+                        row.style.display = ''; // Show row
+                        
+                        // Apply yellow highlight to ALL cells that contain the search term
+                        cells.forEach(cell => {
+                            const originalText = cell.getAttribute('data-original');
+                            if (searchTerm.length > 0 && originalText.toLowerCase().includes(searchTerm)) {
+                                // Regex to match exact phrase while keeping original case
+                                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                                cell.innerHTML = originalText.replace(regex, `<span class="bg-yellow-300 text-black px-0.5 font-bold rounded-sm">$1</span>`);
+                            } else {
+                                cell.innerHTML = originalText;
+                            }
+                        });
                     } else {
-                        row.style.display = 'none';
+                        row.style.display = 'none'; // Hide row
                     }
                 });
             }
@@ -770,6 +784,60 @@ Version 1.0.0 Release Notes
             if(typeFilter) typeFilter.addEventListener('change', filterTable);
             if(themeFilter) themeFilter.addEventListener('change', filterTable);
         }
+
+        // --- Table Interaction Engine ---
+        window.sortDirections = [true, true, true]; // Tracks Asc/Desc for Author, Year, Title
+
+        window.sortTable = function(columnIndex) {
+            const container = document.getElementById('matrix-tbody');
+            if (!container) return;
+            
+            // Get current rows directly from DOM to respect current state
+            const rows = Array.from(container.querySelectorAll('.matrix-row'));
+            const isAsc = window.sortDirections[columnIndex];
+
+            rows.sort((a, b) => {
+                const cellA = a.children[columnIndex];
+                const cellB = b.children[columnIndex];
+                
+                if (!cellA || !cellB) return 0;
+
+                const aText = cellA.innerText.trim();
+                const bText = cellB.innerText.trim();
+
+                // Detect if column is numbers (like Year) or text (like Author/Title)
+                const aNum = parseFloat(aText);
+                const bNum = parseFloat(bText);
+
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return isAsc ? aNum - bNum : bNum - aNum; // Numeric Sort
+                }
+
+                // Alphabetical Sort
+                return isAsc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+            });
+
+            // Toggle direction for the next click
+            window.sortDirections[columnIndex] = !isAsc;
+
+            // Re-append rows in the new sorted order
+            rows.forEach(row => container.appendChild(row));
+        };
+
+        window.selectRow = function(clickedRow) {
+            // 1. Reset ALL rows to normal
+            document.querySelectorAll('.matrix-row').forEach(row => {
+                // Remove the active yellow/dark states
+                row.classList.remove('bg-yellow-100', 'dark:bg-slate-700', 'bg-yellow-100/30', 'dark:bg-blue-900/20');
+                // Restore the standard hover effects
+                row.classList.add('hover:bg-blue-50', 'dark:hover:bg-slate-800/80');
+            });
+            
+            // 2. Set the CLICKED row to active
+            clickedRow.classList.add('bg-yellow-100', 'dark:bg-slate-700');
+            // Remove the hover effects so the yellow stays perfectly solid when the mouse is over it
+            clickedRow.classList.remove('hover:bg-blue-50', 'dark:hover:bg-slate-800/80');
+        };
 
         function initLivePreviews() {
             const mindmapDom = document.getElementById('mindmap-preview-container');
@@ -1694,33 +1762,42 @@ C7  - [Sample & Data Scope]`;
                                         <option value="chapter">Book Chapter</option>
                                     </select>
                                 </div>
-                                <div class="flex-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded shadow-sm overflow-hidden flex flex-col">
-                                    <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700 shrink-0">
-                                        <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">AUTHOR</div>
-                                        <div class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate">YEAR</div>
-                                        <div class="px-3 py-2 text-[10px] font-bold text-white flex-[2] truncate">TITLE</div>
+                                <!-- Interactive Sortable Headers -->
+                                <div class="bg-slate-800 dark:bg-slate-950 flex border-b border-gray-200 dark:border-slate-700 shrink-0 select-none">
+                                    <div onclick="sortTable(0)" class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate cursor-pointer hover:bg-slate-700 transition-colors flex justify-between items-center group" title="Sort by Author">
+                                        AUTHOR <span class="opacity-40 group-hover:opacity-100 text-xs">↕</span>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0 matrix-row" data-type="journal" data-theme="ai">
+                                    <div onclick="sortTable(1)" class="px-3 py-2 text-[10px] font-bold text-white flex-1 border-r border-slate-700 truncate cursor-pointer hover:bg-slate-700 transition-colors flex justify-between items-center group" title="Sort by Year">
+                                        YEAR <span class="opacity-40 group-hover:opacity-100 text-xs">↕</span>
+                                    </div>
+                                    <div onclick="sortTable(2)" class="px-3 py-2 text-[10px] font-bold text-white flex-[2] truncate cursor-pointer hover:bg-slate-700 transition-colors flex justify-between items-center group" title="Sort by Title">
+                                        TITLE <span class="opacity-40 group-hover:opacity-100 text-xs">↕</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Interactive Selectable Rows -->
+                                <div id="matrix-tbody" class="flex flex-col w-full">
+                                    <div onclick="selectRow(this)" class="flex border-b border-gray-100 dark:border-slate-700 bg-yellow-100/30 dark:bg-blue-900/20 shrink-0 matrix-row cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800/80 transition-colors" data-type="journal" data-theme="ai">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Smith, J.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2024</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate row-title">Literature Review on AI</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="journal" data-theme="ai">
+                                    <div onclick="selectRow(this)" class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800/80 transition-colors" data-type="journal" data-theme="ai">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Doe, A.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2023</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate row-title">Machine Learning Trends</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="book" data-theme="ai">
+                                    <div onclick="selectRow(this)" class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800/80 transition-colors" data-type="book" data-theme="ai">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Jhon, R.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate row-title">Foundations of AI Governance</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="chapter" data-theme="health">
+                                    <div onclick="selectRow(this)" class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800/80 transition-colors" data-type="chapter" data-theme="health">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Willian, H.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2025</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate row-title">Governance in Healthcare Networks</div>
                                     </div>
-                                    <div class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row" data-type="journal" data-theme="health">
+                                    <div onclick="selectRow(this)" class="flex border-b border-gray-100 dark:border-slate-700 shrink-0 matrix-row cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-800/80 transition-colors" data-type="journal" data-theme="health">
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">Kimaun, C.</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-1 border-r border-gray-100 dark:border-slate-700 truncate">2026</div>
                                         <div class="px-3 py-2 text-[10px] text-gray-700 dark:text-gray-300 flex-[2] truncate row-title">Literature Matrix: Shaping Healthcare</div>
@@ -1979,62 +2056,62 @@ C7  - [Sample & Data Scope]`;
                             <div class="grid sm:grid-cols-2 gap-x-8 gap-y-4">
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Create New Library</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + N</code>
+                                    <code class="font-mono text-blue-600 dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-200 dark:border-blue-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + N</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Add Literature</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + L</code>
+                                    <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-slate-950 border border-emerald-200 dark:border-emerald-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + L</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Open Library</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + O</code>
+                                    <code class="font-mono text-purple-600 dark:text-purple-400 font-bold bg-white dark:bg-slate-950 border border-purple-200 dark:border-purple-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + O</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Edit Literature</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + E</code>
+                                    <code class="font-mono text-amber-600 dark:text-amber-500 font-bold bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + E</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Open Library in Window Explorer</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + P</code>
+                                    <code class="font-mono text-cyan-600 dark:text-cyan-400 font-bold bg-white dark:bg-slate-950 border border-cyan-200 dark:border-cyan-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + P</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Copy Citation <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + C</code>
+                                    <code class="font-mono text-pink-600 dark:text-pink-400 font-bold bg-white dark:bg-slate-950 border border-pink-200 dark:border-pink-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + C</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Import References</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + I</code>
+                                    <code class="font-mono text-indigo-600 dark:text-indigo-400 font-bold bg-white dark:bg-slate-950 border border-indigo-200 dark:border-indigo-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + I</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Export References <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + S</code>
+                                    <code class="font-mono text-fuchsia-600 dark:text-fuchsia-400 font-bold bg-white dark:bg-slate-950 border border-fuchsia-200 dark:border-fuchsia-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + S</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Save As</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + Shift + S</code>
+                                    <code class="font-mono text-orange-600 dark:text-orange-400 font-bold bg-white dark:bg-slate-950 border border-orange-200 dark:border-orange-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + Shift + S</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Export Entire Matrix to Excel</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + X</code>
+                                    <code class="font-mono text-teal-600 dark:text-teal-400 font-bold bg-white dark:bg-slate-950 border border-teal-200 dark:border-teal-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + X</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Backup as Zip</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + B</code>
+                                    <code class="font-mono text-sky-600 dark:text-sky-400 font-bold bg-white dark:bg-slate-950 border border-sky-200 dark:border-sky-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + B</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Delete Row <span class="text-[10px] text-gray-400 dark:text-slate-500">(multi-select)</span></span>
-                                    <code class="font-mono text-red-500 dark:text-red-400 font-bold bg-white dark:bg-slate-950 border border-red-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Del</code>
+                                    <code class="font-mono text-red-500 dark:text-red-400 font-bold bg-white dark:bg-slate-950 border border-red-200 dark:border-red-800/60 px-2 py-1 rounded text-xs shadow-sm">Del</code>
                                 </div>
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2 md:col-span-1">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Exit</span>
-                                    <code class="font-mono text-primary dark:text-blue-400 font-bold bg-white dark:bg-slate-950 border border-blue-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + W</code>
+                                    <code class="font-mono text-slate-600 dark:text-slate-400 font-bold bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + W</code>
                                 </div>
                                 
                                 <div class="flex justify-between items-center border-b border-gray-100 dark:border-slate-700 pb-2 sm:col-span-2 mt-2">
                                     <span class="text-sm text-gray-700 dark:text-slate-300">Open Visualizers</span>
                                     <div class="flex gap-2">
-                                        <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-slate-950 border border-emerald-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + M (Mindmap)</code>
-                                        <code class="font-mono text-purple-600 dark:text-purple-400 font-bold bg-white dark:bg-slate-950 border border-purple-100 dark:border-slate-800 px-2 py-1 rounded text-xs shadow-sm">Ctrl + T (Analytics)</code>
+                                        <code class="font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-white dark:bg-slate-950 border border-emerald-200 dark:border-emerald-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + M (Mindmap)</code>
+                                        <code class="font-mono text-purple-600 dark:text-purple-400 font-bold bg-white dark:bg-slate-950 border border-purple-200 dark:border-purple-800/60 px-2 py-1 rounded text-xs shadow-sm">Ctrl + T (Analytics)</code>
                                     </div>
                                 </div>
                             </div>
