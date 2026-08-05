@@ -166,6 +166,41 @@
             startAutoSlide();
         };
 
+        // --- Smart Theme Sync for Hero Carousel ---
+        // Automatically watches the website's global theme and syncs the app images
+        const themeObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    // Check if the website just switched to dark mode
+                    const isGlobalDark = document.documentElement.classList.contains('dark');
+                    
+                    // Update the carousel's internal memory
+                    isDarkApp = isGlobalDark; 
+                    
+                    // Fade the dark images in or out
+                    const darkImgs = document.querySelectorAll('.app-dark-img');
+                    darkImgs.forEach(img => {
+                        if (isGlobalDark) {
+                            img.classList.remove('opacity-0');
+                            img.classList.add('opacity-100');
+                        } else {
+                            img.classList.remove('opacity-100');
+                            img.classList.add('opacity-0');
+                        }
+                    });
+
+                    // Update the tooltip text
+                    const hintText = document.getElementById('hero-app-hint');
+                    if (hintText) {
+                        hintText.innerHTML = isGlobalDark ? '☀️ Click to view Light Theme' : '🌙 Click to view Dark Theme';
+                    }
+                }
+            });
+        });
+
+        // Start watching the <html> tag for theme changes
+        themeObserver.observe(document.documentElement, { attributes: true });
+
         // // --- Independent Hero Image Toggle (Smooth Fade) ---
         // window.toggleHeroAppImage = function() {
         //     const darkImg = document.getElementById('hero-app-dark');
@@ -1531,7 +1566,7 @@ C7  - [Sample & Data Scope]`;
                     <button onclick="switchPage('page-home', 'word-addin')" class="bg-white dark:bg-darkcard border border-gray-300 dark:border-slate-700 text-slate-700 dark:text-gray-200 px-8 py-3.5 rounded-xl text-lg font-semibold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Explore Word Add-in</button>
                 </div>
 
-             <!-- App Interface Showcase Carousel -->
+                <!-- App Interface Showcase Carousel -->
                 <div class="max-w-6xl mx-auto relative px-2 sm:px-4 group" id="hero-carousel-container">
                     
                     <!-- Subtle background glow -->
