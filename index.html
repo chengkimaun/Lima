@@ -1089,15 +1089,17 @@ Version 1.0.0 Release Notes
 
         
         window.updateCitationFormat = function(format) {
-            // Update active button state
+            // Reset all citation buttons to inactive style AND restore hover effects
             document.querySelectorAll('.citation-btn').forEach(btn => {
-                btn.classList.remove('bg-primary', 'text-white', 'border-primary');
-                btn.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200', 'border-gray-200', 'dark:border-slate-600');
+                btn.classList.remove('bg-primary', 'text-white', 'border-primary', 'shadow-md');
+                btn.classList.add('bg-white', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200', 'border-gray-200', 'dark:border-slate-600', 'hover:bg-gray-50', 'dark:hover:bg-slate-600');
             });
+            
+            // Activate the selected button AND remove hover effects so it stays solid blue
             const activeBtn = document.getElementById(`cite-btn-${format}`);
             if(activeBtn) {
-                activeBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200', 'border-gray-200', 'dark:border-slate-600');
-                activeBtn.classList.add('bg-primary', 'text-white', 'border-primary');
+                activeBtn.classList.remove('bg-white', 'dark:bg-slate-700', 'text-slate-700', 'dark:text-slate-200', 'border-gray-200', 'dark:border-slate-600', 'hover:bg-gray-50', 'dark:hover:bg-slate-600');
+                activeBtn.classList.add('bg-primary', 'text-white', 'border-primary', 'shadow-md');
             }
 
             // Update output text
@@ -1712,13 +1714,13 @@ C7  - [Sample & Data Scope]`;
                                     <p class="text-xs text-gray-500 dark:text-gray-400">Journal of Future Tech • Vol 12, Issue 4</p>
                                 </div>
                                 
-                                <div class="flex flex-wrap gap-2 mb-4">
-                                    <button id="cite-btn-APA" onclick="window.updateCitationFormat('APA')" class="citation-btn bg-primary text-white border border-primary text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">APA</button>
-                                    <button id="cite-btn-MLA" onclick="window.updateCitationFormat('MLA')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">MLA</button>
-                                    <button id="cite-btn-Chicago" onclick="window.updateCitationFormat('Chicago')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">Chicago</button>
-                                    <button id="cite-btn-Harvard" onclick="window.updateCitationFormat('Harvard')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">Harvard</button>
-                                    <button id="cite-btn-Vancouver" onclick="window.updateCitationFormat('Vancouver')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition hover:bg-gray-50 dark:hover:bg-slate-600">Vancouver</button>
-                                </div>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <button id="cite-btn-APA" onclick="window.updateCitationFormat('APA')" class="citation-btn bg-primary text-white border border-primary text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">APA</button>
+                                <button id="cite-btn-MLA" onclick="window.updateCitationFormat('MLA')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">MLA</button>
+                                <button id="cite-btn-Chicago" onclick="window.updateCitationFormat('Chicago')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">Chicago</button>
+                                <button id="cite-btn-Harvard" onclick="window.updateCitationFormat('Harvard')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">Harvard</button>
+                                <button id="cite-btn-Vancouver" onclick="window.updateCitationFormat('Vancouver')" class="citation-btn bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-600 text-xs px-3 py-1.5 rounded shadow-sm font-semibold transition">Vancouver</button>
+                            </div>
                                 
                                 <div class="bg-white dark:bg-slate-800 rounded border border-gray-200 dark:border-slate-700 p-4 flex-1">
                                     <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Generated Citation</span>
