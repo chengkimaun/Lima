@@ -292,18 +292,26 @@
                 targetPage.classList.add('block');
             }
 
-            // --- NEW: Update the URL so the user can copy and share it ---
+            // --- NEW: Force nav badge visibility check on page change ---
+            const navBadge = document.getElementById('nav-promo-badge');
+            if (navBadge && isPromoActive) {
+                if (pageId === 'page-download' || pageId === 'page-contact') {
+                    navBadge.style.display = 'flex';
+                } else if (pageId === 'page-home' && window.scrollY <= 150) {
+                    navBadge.style.display = 'none';
+                }
+            }
+            // -----------------------------------------------------------
+
             let hashName = pageId.replace('page-', '');
             if (scrollToId) {
-                hashName = scrollToId; // e.g., #word-addin
+                hashName = scrollToId;
             }
-            // Update URL without refreshing the page
             if (history.pushState) {
                 history.pushState(null, null, '#' + hashName);
             } else {
                 location.hash = '#' + hashName;
             }
-            // -------------------------------------------------------------
 
             if (scrollToId) {
                 setTimeout(() => {
@@ -469,10 +477,22 @@
         // --- Smart Scroll Listener for Nav Banner ---
         window.checkPromoScroll = function() {
             const navBadge = document.getElementById('nav-promo-badge');
-            if (!navBadge) return;
+            if (!navBadge || !isPromoActive) return;
             
-            // Only show the tiny nav badge if the promo is active AND the user has scrolled past the big banner (150px)
-            if (isPromoActive && window.scrollY > 150) {
+            // Check if the Download or Contact page is currently visible
+            const downloadPage = document.getElementById('page-download');
+            const contactPage = document.getElementById('page-contact');
+            const isDownloadActive = downloadPage && !downloadPage.classList.contains('hidden');
+            const isContactActive = contactPage && !contactPage.classList.contains('hidden');
+
+            // If we are on Download or Contact, always show the badge
+            if (isDownloadActive || isContactActive) {
+                navBadge.style.display = 'flex';
+                return;
+            }
+
+            // Otherwise, use the original scroll behavior for Home/Pricing
+            if (window.scrollY > 150) {
                 navBadge.style.display = 'flex';
             } else {
                 navBadge.style.display = 'none';
@@ -535,7 +555,7 @@
             initTheme();
             initLivePreviews();
             initTableFilter();
-            fetchChangelog();
+            loadChangelog();
 
             // --- NEW: Read the URL to open the shared page ---
             const hash = window.location.hash.substring(1); // removes the '#'
@@ -554,28 +574,31 @@
             // -------------------------------------------------
         });        
 
-        // --- Fetch Changelog Logic ---
-        async function fetchChangelog() {
-            const fileId = '161nAy81V-5TfHgWDbFuUcsbLOOOkAhFo';
-            const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        // // --- Fetch Changelog Logic ---
+        // async function fetchChangelog() {
+        //     const fileId = '161nAy81V-5TfHgWDbFuUcsbLOOOkAhFo';
+        //     const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
             
-            try {
-                // Try to fetch via a raw CORS proxy
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
+        //     try {
+        //         // Try to fetch via a raw CORS proxy
+        //         const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+        //         const response = await fetch(proxyUrl);
                 
-                if (!response.ok) throw new Error('Network response was not ok.');
+        //         if (!response.ok) throw new Error('Network response was not ok.');
                 
-                const text = await response.text();
-                renderChangelogHTML(text);
+        //         const text = await response.text();
+        //         renderChangelogHTML(text);
 
-            } catch (error) {
-                console.error('Error fetching changelog, loading fallback:', error);
+        //     } catch (error) {
+        //         console.error('Error fetching changelog, loading fallback:', error);
                 
-                // Fallback content matching your exact file so the UI never breaks
-                const fallbackText = `
-# LITERATURE MATRIX - VERSION HISTORY
-------------------------------------
+        //         // Fallback content matching your exact file so the UI never breaks
+        //         const fallbackText = `
+
+        // --- Static Changelog Logic ---
+        function loadChangelog() {
+            // Static content matching your exact file so the UI never breaks
+            const staticText = `
 Version 1.2.9 Release Notes
 
 Microsoft Word Add-in
@@ -741,14 +764,39 @@ Version 1.0.0 Release Notes
 * INITIAL RELEASE: Establishment of the core Literature Matrix framework.
 * CORE FUNCTIONALITY: Basic cataloging, indexing, manual imports, and AboutBox metadata.
 `;
-                renderChangelogHTML(fallbackText);
+           const container = document.getElementById('changelog-container');
+            
+            // 1. Show the pulsing skeleton lines
+            if (container) {
+                container.innerHTML = `
+                    <div class="animate-pulse py-8 px-4 w-full space-y-6">
+                        <!-- Top full line -->
+                        <div class="h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full w-full"></div>
+                        
+                        <!-- Middle split line -->
+                        <div class="flex gap-4">
+                            <div class="h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full w-3/5"></div>
+                            <div class="h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full w-2/5"></div>
+                        </div>
+                        
+                        <!-- Bottom full line -->
+                        <div class="h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full w-11/12"></div>
+                    </div>
+                `;
             }
+
+            // 2. Wait 1.5 seconds, then render the actual changelog
+            setTimeout(() => {
+                renderChangelogHTML(staticText);
+            }, 2500);
         }
 
         function renderChangelogHTML(text) {
             let html = '';
             const lines = text.split('\n');
             let inList = false;
+
+            let isFirstVersion = true; // Add this new tracker!
 
             lines.forEach(line => {
                 const t = line.trim();
@@ -759,7 +807,12 @@ Version 1.0.0 Release Notes
                      // Ignore dashed lines
                 } else if (/^version\s+\d/i.test(t)) {
                     if (inList) { html += '</ul>'; inList = false; }
-                    html += `<div class="flex items-center gap-4 mt-10 mb-6">
+
+                    // Decide the margin based on whether it's the first version
+                    const topMargin = isFirstVersion ? 'mt-0' : 'mt-10';
+                    isFirstVersion = false; // Turn it off after the first one!
+
+                    html += `<div class="flex items-center gap-4 ${topMargin} mb-6">
                                 <h3 class="text-lg font-bold text-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-4 py-1.5 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800">${t}</h3>
                                 <div class="h-px bg-gray-200 dark:bg-slate-700 flex-1"></div>
                              </div>`;
@@ -2501,16 +2554,43 @@ C7  - [Sample & Data Scope]`;
                         </div>
                         
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
-                            <!-- Direct Download Links -->
-                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.exe" download class="bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
-                                <span>⬇️</span> Download Installer (.exe)
+                            <!-- Zip Download Links -->
+                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.zip" download class="relative bg-primary text-white flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:bg-blue-700 transition shadow-md flex items-center justify-center gap-2">
+                                
+                                <!-- Floating Recommended Badge (Emerald Green for high contrast) -->
+                                <span class="absolute -top-3 -right-2 bg-emerald-500 text-white text-[10px] uppercase font-black px-3 py-0.5 rounded-full shadow-md border border-emerald-400 z-10 whitespace-nowrap">
+                                    ⭐ Recommended
+                                </span>
+
+                                <!-- FIXED: Changed 'Portable' to 'Setup Package' -->
+                                <span>📦</span> Download Setup Package (.zip)
                             </a>
-                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.zip" download class="bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-600 text-slate-700 dark:text-gray-200 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-slate-500 transition shadow-sm flex items-center justify-center gap-2">
-                                <span>📦</span> Download Portable (.zip)
+                            
+                            <!-- Direct Download Links -->
+                            <a href="https://pub-349f04e20e6149809045732c4ab8bea9.r2.dev/Literature%20Matrix.exe" download class="bg-white dark:bg-slate-800 border-2 border-gray-200 dark:border-slate-600 text-slate-700 dark:text-gray-200 flex-1 text-center px-6 py-4 rounded-xl font-semibold hover:border-gray-300 dark:hover:border-slate-500 transition shadow-sm flex items-center justify-center gap-2">
+                                <span>⬇️</span> Download Installer (.exe)
                             </a>
                         </div>
                         <p class="text-xs text-gray-400 dark:text-gray-500 mt-4 text-center">Compatible with Windows 10 & 11. Requires Microsoft Word 2016 or newer.</p>
                     </div>
+                    <!-- Recommended Installation Guide Box (Matched Width, Larger Font) -->
+                    <div class="mt-6 w-full bg-blue-50 dark:bg-slate-800/60 border border-blue-100 dark:border-slate-700 rounded-xl p-6 text-left flex gap-4">
+                        <div class="text-blue-500 text-3xl shrink-0 mt-1">
+                            💡
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-slate-900 dark:text-white text-base mb-2">Recommended Installation</h4>
+                            <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed mb-3">
+                                Because this is a new release, Windows SmartScreen may flag the direct <strong>.exe</strong> installer. To prevent this, we recommend downloading the <strong>.zip</strong> setup.
+                            </p>
+                            <ul class="text-sm text-slate-700 dark:text-slate-300 list-disc list-inside space-y-1.5 ml-1">
+                                <li>Extract the downloaded <strong>.zip</strong> folder.</li>
+                                <li>Right-click and run the <strong>1_Run_Me_First.bat</strong> file to securely install our publisher certificate.</li>
+                                <li>The installer will then launch automatically without warnings!</li>
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Changelog Bottom Area -->
