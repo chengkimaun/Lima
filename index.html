@@ -346,6 +346,27 @@
                 const homeBanner = document.getElementById('home-promo-banner');
                 if (homeBanner) homeBanner.style.display = active ? 'flex' : 'none';
 
+                // --- NEW: Toggle Dynamic Savings Badges ---
+                const badge3 = document.getElementById('badge-3-months');
+                const badge6 = document.getElementById('badge-6-months');
+                const badge1 = document.getElementById('badge-1-year');
+
+                if (active) {
+                    if(badge3) badge3.innerHTML = '<span class="text-slate-500 dark:text-slate-400 line-through opacity-80">Save $5</span> <span class="ml-1 text-red-500 font-extrabold">Save $12.50</span>';
+                    
+                    // FIXED: "Popular" gets a distinct bold blue, old save becomes muted gray
+                    if(badge6) badge6.innerHTML = '<span class="text-blue-700 dark:text-blue-300 font-black">Popular</span> <span class="opacity-40 mx-0.5">•</span> <span class="text-slate-500 dark:text-slate-400 line-through opacity-80">Save $15</span> <span class="ml-1 text-red-500 font-extrabold">Save $28.50</span>';
+                    
+                    if(badge1) badge1.innerHTML = '<span class="text-slate-500 dark:text-slate-400 line-through opacity-80">Save $35</span> <span class="ml-1 text-red-500 font-extrabold">Save $60.50</span>';
+                } else {
+                    if(badge3) badge3.innerHTML = 'Save $5';
+                    
+                    // Also keeps "Popular" looking sharp when the timer is over!
+                    if(badge6) badge6.innerHTML = '<span class="text-blue-700 dark:text-blue-300 font-black">Popular</span> <span class="opacity-40 mx-0.5">•</span> Save $15';
+                    
+                    if(badge1) badge1.innerHTML = 'Save $35';
+                }
+                // ------------------------------------------
                 // Toggle ABA Modal Views
                 const abaPromoView = document.getElementById('aba-promo-view');
                 const abaStandardView = document.getElementById('aba-standard-view');
@@ -2317,7 +2338,7 @@ C7  - [Sample & Data Scope]`;
                     
                     <!-- 3 Months -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative flex flex-col">
-                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $5</div>
+                        <div id="badge-3-months" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide whitespace-nowrap">Save $5</div>
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">3 Months</h3>
                         <div id="price-container-3-months"></div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
@@ -2326,7 +2347,7 @@ C7  - [Sample & Data Scope]`;
                     
                     <!-- 6 Months -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative flex flex-col">
-                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Popular • Save $15</div>
+                        <div id="badge-6-months" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide whitespace-nowrap">Popular • Save $15</div>
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">6 Months</h3>
                         <div id="price-container-6-months"></div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
@@ -2335,7 +2356,7 @@ C7  - [Sample & Data Scope]`;
                     
                     <!-- 1 Year -->
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-6 border border-gray-200 dark:border-slate-700 text-center hover:shadow-lg transition relative flex flex-col">
-                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">Save $35</div>
+                        <div id="badge-1-year" class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide whitespace-nowrap">Save $35</div>
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2 mt-2">1 Year</h3>
                         <div id="price-container-1-year"></div>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-slate-700 flex-grow">1 Device</p>
