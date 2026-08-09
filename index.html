@@ -614,6 +614,31 @@
         function loadChangelog() {
             // Static content matching your exact file so the UI never breaks
             const staticText = `
+Version 1.3.0 Release Notes
+
+Microsoft Word Add-in
+
+* Edit Database Recovery: Restores the full reference list automatically if literature is currently filtered or sorted in the app.
+* Smart Space Cleanup: Safely removes excess spaces or adds a missing one before inserting a new citation, leaving exactly one perfect space without freezing the document.
+
+Main Application
+
+* Slanted Analytics Labels: Rotated X-axis text to a slanted sliding style to clearly display longer titles on the dashboard without overlapping.
+* Matrix Typography Engine: Added font and font-size selectors (up to 26px) in the column menu with a 16px default baseline.
+* Excel-Style Freeze Panes: Fixed horizontal scrolling jitter and sub-pixel gaps using precise CSS box-shadow layering for smooth sticky columns.
+* Crisp Selection Borders: Used the CSS :has() selector to create balanced 1px top and bottom borders on selected rows.
+* Optimized Citation Panel: Removed citation box scrollbars and updated multi-selection to display item counts while preserving active data in the meta panel.
+* Live-Preview Browser Bar: Added real-time icon recalculation during panel resizing for smooth toolbar responsiveness.
+* Responsive WebView Toolbar: Action buttons adjust to search box width, support combobox gaps, and switch to icon-only on small screens.
+* Smart Browser Bar: Upgraded with CSS Flexbox to hide overflowing buttons and prevent half-cut icons.
+* Fluid Search Box: Dynamically expands on large screens and compresses neatly on smaller displays.
+* Adaptive Meta Panel: Maintains minimum width while keeping the toggle arrow securely pinned.
+* Master Panel Toggle: Added a "Show Master Panel" option (F4 shortcut) to hide or reveal the bottom workspace with saved layout preferences.
+* Recent Open File: Remembers and automatically restores the last opened library on startup.
+* Bulletproof Internal Browser: Uses an opacity shield to prevent flashing and ensures the window pulls to the front.
+* License Status Indicator: Displays current license status with a colored background in the top-right corner.
+* Modern Tooltip Engine: Features instant-hiding on click, drag, or typing, smart Y-axis positioning, and a smooth delay timer.
+
 Version 1.2.9 Release Notes
 
 Microsoft Word Add-in
@@ -1535,9 +1560,9 @@ C7  - [Sample & Data Scope]`;
             
             <!-- Title + Promo Badge Group -->
             <div class="flex items-center gap-1.5 sm:gap-3 min-w-0">
+                <!-- FIXED: Changed 'font-extrabold' to 'font-normal' -->
                 <a href="#" onclick="switchPage('page-home')" class="flex items-center gap-1.5 sm:gap-2 font-bold text-primary tracking-tight min-w-0">
                     <img src="library.ico" alt="Logo" class="w-6 h-6 sm:w-8 sm:h-8 shrink-0" onerror="this.style.display='none'">
-                    <!-- Added an ID and moved the text size classes here -->
                     <span id="nav-title-text" class="truncate text-[15px] sm:text-2xl transition-all duration-300">Literature Matrix</span>
                 </a>
                 
@@ -2570,7 +2595,7 @@ C7  - [Sample & Data Scope]`;
                                 <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Literature Matrix Bundle</h3>
                                 <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Includes Desktop App + Word Add-in + Sample Database</p>
                             </div>
-                            <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-sm font-bold px-4 py-1.5 rounded-full">v1.2.9 Latest</span>
+                            <span class="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-sm font-bold px-4 py-1.5 rounded-full">v1.3.0 Latest</span>
                         </div>
                         
                         <div class="flex flex-col sm:flex-row justify-center gap-4">
