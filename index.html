@@ -610,6 +610,9 @@
             initTableFilter();
             loadChangelog();
 
+            // --- FIXED: Start the carousel automatically on page load! ---
+            startAutoSlide();
+
             // --- NEW: Read the URL to open the shared page ---
             const hash = window.location.hash.substring(1); // removes the '#'
             if (hash) {
