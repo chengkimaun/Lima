@@ -122,7 +122,7 @@
         let currentSlide = 0;
         let isDarkApp = false;
         let slideInterval;
-        const totalSlides = 11; // Updated to 5 slides
+        const totalSlides = 14; // Updated to 14 slides
 
         window.updateCarousel = function() {
             const slides = document.querySelectorAll('.carousel-slide');
@@ -235,22 +235,6 @@
 
         // Start watching the <html> tag for theme changes
         themeObserver.observe(document.documentElement, { attributes: true });
-
-        // // --- Independent Hero Image Toggle (Smooth Fade) ---
-        // window.toggleHeroAppImage = function() {
-        //     const darkImg = document.getElementById('hero-app-dark');
-        //     if (darkImg) {
-        //         if (darkImg.classList.contains('opacity-0')) {
-        //             // Fade to Dark
-        //             darkImg.classList.remove('opacity-0');
-        //             darkImg.classList.add('opacity-100');
-        //         } else {
-        //             // Fade to Light
-        //             darkImg.classList.remove('opacity-100');
-        //             darkImg.classList.add('opacity-0');
-        //         }
-        //     }
-        // };
 
         // --- Native-Style Mouse Tooltip Tracking ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -1797,6 +1781,24 @@ C7  - [Sample & Data Scope]`;
                         <div class="carousel-slide absolute top-0 left-0 w-full opacity-0 z-0 pointer-events-none transition-opacity duration-700 ease-in-out">
                             <img src="11_1.png" alt="Internal Browser Light Theme" class="w-full h-auto block mx-auto app-light-img">
                             <img src="11_2.png" alt="Internal Browser Dark Theme" class="absolute top-0 left-0 w-full h-auto block mx-auto app-dark-img opacity-0 transition-opacity duration-700">
+                        </div>
+
+                        <!-- Slide 12 -->
+                        <div class="carousel-slide absolute top-0 left-0 w-full opacity-0 z-0 pointer-events-none transition-opacity duration-700 ease-in-out">
+                            <img src="12_1.png" alt="Internal Browser Light Theme 12" class="w-full h-auto block mx-auto app-light-img">
+                            <img src="12_2.png" alt="Internal Browser Dark Theme 12" class="absolute top-0 left-0 w-full h-auto block mx-auto app-dark-img opacity-0 transition-opacity duration-700">
+                        </div>
+
+                        <!-- Slide 13 -->
+                        <div class="carousel-slide absolute top-0 left-0 w-full opacity-0 z-0 pointer-events-none transition-opacity duration-700 ease-in-out">
+                            <img src="13_1.png" alt="Internal Browser Light Theme 13" class="w-full h-auto block mx-auto app-light-img">
+                            <img src="13_2.png" alt="Internal Browser Dark Theme 13" class="absolute top-0 left-0 w-full h-auto block mx-auto app-dark-img opacity-0 transition-opacity duration-700">
+                        </div>
+
+                        <!-- Slide 14 -->
+                        <div class="carousel-slide absolute top-0 left-0 w-full opacity-0 z-0 pointer-events-none transition-opacity duration-700 ease-in-out">
+                            <img src="14_1.png" alt="Internal Browser Light Theme 14" class="w-full h-auto block mx-auto app-light-img">
+                            <img src="14_2.png" alt="Internal Browser Dark Theme 14" class="absolute top-0 left-0 w-full h-auto block mx-auto app-dark-img opacity-0 transition-opacity duration-700">
                         </div>
 
                         <!-- Floating Native Tooltip (Controlled by JS Timer) -->
