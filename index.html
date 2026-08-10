@@ -311,6 +311,25 @@
                 targetPage.classList.add('block');
             }
 
+            // --- NEW: Active Nav Link Highlighter (Safe Color Only) ---
+            let navKey = 'home';
+            if (scrollToId) {
+                navKey = scrollToId; 
+            } else if (pageId !== 'page-home') {
+                navKey = pageId.replace('page-', ''); 
+            }
+
+            document.querySelectorAll('.nav-item').forEach(btn => {
+                // 1. Remove blue color so it falls back to the parent's gray
+                btn.classList.remove('text-primary', 'dark:text-blue-400');
+            });
+
+            document.querySelectorAll(`.nav-item[data-nav="${navKey}"]`).forEach(btn => {
+                // 2. Add blue color only to the clicked tab
+                btn.classList.add('text-primary', 'dark:text-blue-400');
+            });
+            // ----------------------------------------------------------
+
             // --- NEW: Force nav badge visibility check on page change ---
             const navBadge = document.getElementById('nav-promo-badge');
             if (navBadge && isPromoActive) {
@@ -1632,16 +1651,15 @@ C7  - [Sample & Data Scope]`;
 
             <!-- Desktop Menu -->
             <div class="hidden lg:flex items-center space-x-6 font-medium text-gray-700 dark:text-gray-300 text-sm xl:text-base">
-                <button onclick="switchPage('page-home')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Home</button>
+                <button data-nav="home" onclick="switchPage('page-home')" class="nav-item text-primary dark:text-blue-400 hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Home</button>
                 
                 <!-- NEW: Literature Matrix Overview Tab -->
-                <button onclick="switchPage('page-home', 'features')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Literature Matrix</button>
+                <button data-nav="features" onclick="switchPage('page-home', 'features')" class="nav-item hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Literature Matrix</button>
                 
-                <button onclick="switchPage('page-home', 'word-addin')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</button>
-                <button onclick="switchPage('page-pricing')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</button>
-                <!-- <button onclick="switchPage('page-tutorials')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Tutorials</button> -->
-                <button onclick="switchPage('page-download')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Download</button>
-                <button onclick="switchPage('page-contact')" class="hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Contact</button>
+                <button data-nav="word-addin" onclick="switchPage('page-home', 'word-addin')" class="nav-item hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Word Add-In</button>
+                <button data-nav="pricing" onclick="switchPage('page-pricing')" class="nav-item hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Pricing</button>
+                <button data-nav="download" onclick="switchPage('page-download')" class="nav-item hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Download</button>
+                <button data-nav="contact" onclick="switchPage('page-contact')" class="nav-item hover:text-primary dark:hover:text-blue-400 transition whitespace-nowrap">Contact</button>
                 
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition shrink-0 ml-2" aria-label="Toggle Dark Mode">
                     <span id="theme-icon" class="text-xl">🌙</span>
@@ -1650,16 +1668,15 @@ C7  - [Sample & Data Scope]`;
             
             <!-- Mobile Menu Dropdown -->
             <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-white dark:bg-darkbg border-b border-gray-200 dark:border-slate-800 shadow-lg lg:hidden flex flex-col p-4 space-y-4 font-medium text-gray-700 dark:text-gray-300">
-                <button onclick="switchPage('page-home')" class="text-left hover:text-primary dark:hover:text-blue-400">Home</button>
+                <button data-nav="home" onclick="switchPage('page-home')" class="nav-item text-left text-primary dark:text-blue-400 hover:text-primary dark:hover:text-blue-400">Home</button>
                 
                 <!-- NEW: Literature Matrix Overview Tab (Mobile) -->
-                <button onclick="switchPage('page-home', 'features')" class="text-left hover:text-primary dark:hover:text-blue-400">Literature Matrix</button>
+                <button data-nav="features" onclick="switchPage('page-home', 'features')" class="nav-item text-left hover:text-primary dark:hover:text-blue-400">Literature Matrix</button>
                 
-                <button onclick="switchPage('page-home', 'word-addin')" class="text-left hover:text-primary dark:hover:text-blue-400">Word Add-In</button>
-                <button onclick="switchPage('page-pricing')" class="text-left hover:text-primary dark:hover:text-blue-400">Pricing</button>
-                <!-- <button onclick="switchPage('page-tutorials')" class="text-left hover:text-primary dark:hover:text-blue-400">Tutorials</button> -->
-                <button onclick="switchPage('page-download')" class="text-left hover:text-primary dark:hover:text-blue-400">Download & Update</button>
-                <button onclick="switchPage('page-contact')" class="text-left hover:text-primary dark:hover:text-blue-400">Contact Us</button>
+                <button data-nav="word-addin" onclick="switchPage('page-home', 'word-addin')" class="nav-item text-left hover:text-primary dark:hover:text-blue-400">Word Add-In</button>
+                <button data-nav="pricing" onclick="switchPage('page-pricing')" class="nav-item text-left hover:text-primary dark:hover:text-blue-400">Pricing</button>
+                <button data-nav="download" onclick="switchPage('page-download')" class="nav-item text-left hover:text-primary dark:hover:text-blue-400">Download & Update</button>
+                <button data-nav="contact" onclick="switchPage('page-contact')" class="nav-item text-left hover:text-primary dark:hover:text-blue-400">Contact Us</button>
                 <div class="pt-2 border-t border-gray-100 dark:border-slate-800">
                     <button onclick="switchPage('page-download')" class="w-full text-center bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm text-sm">Download</button>
                 </div>
