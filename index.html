@@ -31,20 +31,66 @@
     </script>
     <!-- Theme & Routing Script -->
     <script>
-        // Theme Logic
-        function initTheme() {
-            const isDark = localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        // ==========================================
+        // --- MASTER THEME ENGINE ---
+        // ==========================================
+        function applyThemeToDOM(isDark) {
             if (isDark) {
                 document.documentElement.classList.add('dark');
-                document.documentElement.style.colorScheme = 'dark'; // Blocks mobile auto-inversion
+                document.documentElement.style.colorScheme = 'dark';
             } else {
                 document.documentElement.classList.remove('dark');
-                document.documentElement.style.colorScheme = 'light'; // Blocks mobile auto-inversion
+                document.documentElement.style.colorScheme = 'light';
             }
-            updateThemeIcons(isDark);
+            
+            // Update navbar icons
+            const icon = document.getElementById('theme-icon');
+            const mobileIcon = document.getElementById('theme-icon-mobile');
+            if (icon) icon.innerText = isDark ? '☀️' : '🌙';
+            if (mobileIcon) mobileIcon.innerText = isDark ? '☀️' : '🌙';
+
+            // Refresh live preview charts if they exist
+            if (typeof initLivePreviews === 'function' && window.mindmapPreview) {
+                initLivePreviews();
+            }
         }
 
-        // NEW: Helper function to safely update both Desktop and Mobile icons
+        // 1. Runs on Page Load
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            const isDark = savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            applyThemeToDOM(isDark);
+            
+            // Short delay to ensure buttons exist in the DOM before outlining them
+            setTimeout(() => updateThemeActiveButton(savedTheme), 50); 
+        }
+
+        // 2. Triggered by Feature 7 Buttons
+        window.setAppTheme = function(themeType) {
+            localStorage.setItem('theme', themeType);
+            const isDark = themeType === 'dark' || (themeType === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            applyThemeToDOM(isDark);
+            updateThemeActiveButton(themeType);
+        };
+
+        // 3. Triggered by Navbar Icons (Overrides System to Hard Light/Dark)
+        function toggleTheme() {
+            const isCurrentlyDark = document.documentElement.classList.contains('dark');
+            const newTheme = isCurrentlyDark ? 'light' : 'dark';
+            window.setAppTheme(newTheme); // Re-uses the main function to keep UI in sync
+        }
+
+        // 4. Live OS Listener (Reacts instantly when Windows/Mac changes)
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            if (savedTheme === 'system') {
+                applyThemeToDOM(e.matches);
+            }
+        });
+        // ==========================================
+
         function updateThemeIcons(isDark) {
             const icon = document.getElementById('theme-icon');
             const mobileIcon = document.getElementById('theme-icon-mobile');
@@ -52,36 +98,25 @@
             if (mobileIcon) mobileIcon.innerText = isDark ? '☀️' : '🌙';
         }
 
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            const isDark = document.documentElement.classList.contains('dark');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            document.documentElement.style.colorScheme = isDark ? 'dark' : 'light'; // Blocks mobile auto-inversion
-            updateThemeIcons(isDark);
-            
-            if(window.mindmapPreview) {
-                initLivePreviews(); 
-            }
+        // Draws the blue ring on the active button in Feature 7
+        function updateThemeActiveButton(activeType) {
+            ['light', 'system', 'dark'].forEach(type => {
+                const btn = document.getElementById(`theme-btn-${type}`);
+                if (btn) {
+                    if (type === activeType) {
+                        btn.classList.add('ring-2', 'ring-primary', 'border-primary', 'dark:border-primary');
+                        btn.classList.remove('border-gray-200', 'border-gray-300', 'dark:border-slate-700', 'dark:border-slate-600');
+                    } else {
+                        btn.classList.remove('ring-2', 'ring-primary', 'border-primary', 'dark:border-primary');
+                        // Restore default borders for inactive buttons
+                        if(type === 'light') btn.classList.add('border-gray-200');
+                        if(type === 'system') btn.classList.add('border-gray-300', 'dark:border-slate-600');
+                        if(type === 'dark') btn.classList.add('border-slate-700');
+                    }
+                }
+            });
         }
-
-        // Used by Feature 7 cards to hard-set the theme
-        function setAppTheme(themeType) {
-            const isDark = themeType === 'dark';
-            if (isDark) {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                document.documentElement.style.colorScheme = 'dark'; // Blocks mobile auto-inversion
-            } else {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                document.documentElement.style.colorScheme = 'light'; // Blocks mobile auto-inversion
-            }
-            updateThemeIcons(isDark);
-            
-            if(window.mindmapPreview) {
-                initLivePreviews(); 
-            }
-        }
+        // ---------------------------
 
         // --- Interactive Hero Carousel Engine (Shape-Adapting) ---
         let currentSlide = 0;
@@ -2182,7 +2217,29 @@ C7  - [Sample & Data Scope]`;
                             </div>
                         </div>
                         <div class="w-full lg:w-1/2">
-                            <div class="grid grid-cols-2 gap-4 h-48">
+                            <div class="grid grid-cols-3 gap-3 h-48">
+                                <!-- Light Theme Button -->
+                                <button id="theme-btn-light" onclick="setAppTheme('light')" class="bg-slate-100 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center p-2 shadow-sm hover:ring-2 ring-primary transition cursor-pointer group">
+                                    <span class="text-2xl sm:text-3xl mb-2 drop-shadow-md group-hover:scale-110 transition-transform">☀️</span>
+                                    <p class="text-slate-700 font-bold text-[11px] sm:text-sm">Light</p>
+                                </button>
+                                
+                                <!-- System Theme Button (Diagonal Split) -->
+                                <button id="theme-btn-system" onclick="setAppTheme('system')" class="relative overflow-hidden rounded-xl border border-gray-300 dark:border-slate-600 h-full flex flex-col items-center justify-center shadow-sm hover:ring-2 ring-primary transition cursor-pointer group">
+                                    <div class="absolute inset-0 bg-[linear-gradient(135deg,#f1f5f9_49.8%,#1e293b_50.2%)]"></div>
+                                    <div class="relative z-10 flex flex-col items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm px-3 py-2 rounded-xl border border-white/50 dark:border-slate-700/50 shadow-sm transition-transform group-hover:scale-105">
+                                        <span class="text-2xl sm:text-3xl mb-1 drop-shadow-md">💻</span>
+                                        <p class="text-slate-900 dark:text-white font-bold text-[11px] sm:text-sm drop-shadow-sm">System</p>
+                                    </div>
+                                </button>
+
+                                <!-- Dark Theme Button -->
+                                <button id="theme-btn-dark" onclick="setAppTheme('dark')" class="bg-[#1e293b] rounded-xl border border-slate-700 h-full flex flex-col items-center justify-center p-2 shadow-sm hover:ring-2 ring-primary transition cursor-pointer group">
+                                    <span class="text-2xl sm:text-3xl mb-2 drop-shadow-md group-hover:scale-110 transition-transform">🌙</span>
+                                    <p class="text-slate-200 font-bold text-[11px] sm:text-sm">Dark</p>
+                                </button>
+                            </div>
+                            <!-- <div class="grid grid-cols-2 gap-4 h-48">
                                 <button onclick="setAppTheme('light')" class="bg-slate-100 rounded-xl border border-gray-200 h-full flex flex-col items-center justify-center p-4 shadow-sm hover:ring-2 ring-primary transition cursor-pointer">
                                     <span class="text-3xl mb-2 drop-shadow-md">☀️</span>
                                     <p class="text-slate-700 font-bold text-sm">Light Theme</p>
@@ -2191,7 +2248,7 @@ C7  - [Sample & Data Scope]`;
                                     <span class="text-3xl mb-2 drop-shadow-md">🌙</span>
                                     <p class="text-slate-200 font-bold text-sm">Dark Theme</p>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
 
