@@ -118,11 +118,11 @@
         }
         // ---------------------------
 
-        // --- Interactive Hero Carousel Engine (Shape-Adapting) ---
+       // --- Interactive Hero Carousel Engine (Shape-Adapting) ---
         let currentSlide = 0;
         let isDarkApp = false;
         let slideInterval;
-        const totalSlides = 14; // Updated to 14 slides
+        const totalSlides = 13; 
 
         window.updateCarousel = function() {
             const slides = document.querySelectorAll('.carousel-slide');
@@ -1817,13 +1817,21 @@ C7  - [Sample & Data Scope]`;
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                     </button>
 
-                    <!-- 5 Dot Indicators -->
-                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-20">
-                        <button onclick="goToSlide(0, event)" class="carousel-dot w-8 h-2.5 rounded-full bg-white/90 shadow-md transition-all duration-300"></button>
-                        <button onclick="goToSlide(1, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-md transition-all duration-300"></button>
-                        <button onclick="goToSlide(2, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-md transition-all duration-300"></button>
-                        <button onclick="goToSlide(3, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-md transition-all duration-300"></button>
-                        <button onclick="goToSlide(4, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-md transition-all duration-300"></button>
+                    <!-- 13 Dot Indicators -->
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2.5 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <button onclick="goToSlide(0, event)" class="carousel-dot w-8 h-2.5 rounded-full bg-white/90 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(1, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(2, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(3, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(4, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(5, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(6, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(7, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(8, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(9, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(10, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(11, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
+                        <button onclick="goToSlide(12, event)" class="carousel-dot w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-300"></button>
                     </div>
                     
                 </div>
