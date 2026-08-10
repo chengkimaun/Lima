@@ -1167,10 +1167,40 @@ Version 1.0.0 Release Notes
 
             if (!selector || !window.analyticsPreview) return;
 
+            // --- 4. TOP AUTHORS (DOUGHNUT CHART) ---
+            if (selector.value === 'authors') {
+                window.analyticsPreview.setOption({
+                    tooltip: { trigger: 'item', formatter: '<b>{b}</b><br/>{c} Papers ({d}%)' },
+                    legend: { top: '5%', left: 'center', textStyle: { color: '#64748b' } },
+                    xAxis: { show: false },
+                    yAxis: { show: false },
+                    grid: { show: false },
+                    series: [{
+                        name: 'Top Authors',
+                        type: 'pie',
+                        radius: ['40%', '70%'], // Inner & outer radius creates the Doughnut ring
+                        center: ['50%', '58%'],
+                        avoidLabelOverlap: false,
+                        itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+                        label: { show: false },
+                        emphasis: {
+                            label: { show: true, fontSize: 12, fontWeight: 'bold' }
+                        },
+                        data: [
+                            { value: 18, name: 'Smith, J.' },
+                            { value: 14, name: 'Doe, A.' },
+                            { value: 10, name: 'Jhon, R.' },
+                            { value: 7, name: 'Willian, H.' },
+                            { value: 5, name: 'Kimaun, C.' }
+                        ]
+                    }]
+                }, true);
+                return;
+            }
+
             switch(selector.value) {
                 case 'trends': type = 'bar'; break;
                 case 'methods': type = 'pie'; break;
-                case 'authors': type = 'bar'; break;
                 case 'impact': type = 'line'; break;
             }
 
@@ -1225,7 +1255,6 @@ Version 1.0.0 Release Notes
                 }, true);
             }
         };
-
 
         // --- Interactive Citation Demo Logic ---
         const citationFormats = {
